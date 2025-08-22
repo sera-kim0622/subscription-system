@@ -11,5 +11,7 @@ export const typeOrmConfig = (
   password: configService.get<string>('DB_PASSWORD'),
   database: configService.get<string>('DB_DATABASE'),
   autoLoadEntities: true, // 모듈에 등록된 엔티티 자동 로드
+  entities: ['dist/**/*.entity.{js,ts}'],
+  migrations: ['dist/migrations/*.{js,ts}'],
   logging: configService.get<string>('NODE_ENV') !== 'production',
 });
