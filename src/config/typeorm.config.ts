@@ -1,5 +1,6 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 export const typeOrmConfig = (
   configService: ConfigService,
@@ -14,4 +15,5 @@ export const typeOrmConfig = (
   entities: ['dist/**/*.entity.{js,ts}'],
   migrations: ['dist/migrations/*.{js,ts}'],
   logging: configService.get<string>('NODE_ENV') !== 'production',
+  namingStrategy: new SnakeNamingStrategy(),
 });
