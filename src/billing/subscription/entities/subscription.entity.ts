@@ -23,7 +23,7 @@ export class Subscription extends CoreEntity {
   product: Product;
 
   // 결제(부모)를 먼저 지운 후 구독을 지울 수 있음. 보통 결제는 이와 상관없이 지울 수 없도록 함
-  @OneToOne(() => Payment, { onDelete: 'RESTRICT' })
+  @OneToOne(() => Payment, (p) => p.subscription, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'payment_id' })
   @Index('uq_subscription_payment_id', { unique: true }) // DB에서 유일성 보장(안전)
   payment: Payment;
