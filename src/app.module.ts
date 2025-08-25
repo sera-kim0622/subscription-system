@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from './config/typeorm.config';
 import { UserModule } from './user/user.module';
 import { BillingModule } from './billing/billing.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { BillingModule } from './billing/billing.module';
     }),
     UserModule,
     BillingModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
