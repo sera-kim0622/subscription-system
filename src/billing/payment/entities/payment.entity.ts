@@ -1,10 +1,14 @@
-import { Entity, Column } from 'typeorm';
+import { Entity, Column, OneToOne } from 'typeorm';
 import { CoreEntity } from 'src/common/core.entity';
 import { PAYMENT_STATUS } from './payment.status';
+import { Subscription } from 'src/billing/subscription/entities/subscription.entity';
 
 @Entity()
 export class Payment extends CoreEntity {
-  @Column({ type: 'uuid', length: 255 })
+  @OneToOne(() => Subscription, (s) => s.payment)
+  subscription: Subscription;
+
+  @Column({ type: 'uuid' })
   pgPaymentId: string;
 
   @Column({ type: 'varchar', length: 50 })
