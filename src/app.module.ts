@@ -5,7 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from './config/typeorm.config';
 import { UserModule } from './user/user.module';
-import { ProductModule } from './product/product.module';
+import { BillingModule } from './billing/billing.module';
 
 @Module({
   imports: [
@@ -17,7 +17,7 @@ import { ProductModule } from './product/product.module';
       useFactory: typeOrmConfig,
     }),
     UserModule,
-    ProductModule,
+    BillingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
