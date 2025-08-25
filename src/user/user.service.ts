@@ -1,26 +1,46 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(
+    @InjectRepository(User) private readonly repo: Repository<User>,
+  ) {}
+
+  async create(dto: CreateUserDto): Promise<User> {
+    const exists = await this.repo.findOne({ where: { email: dto.email } });
+    if (exists) throw new ConflictException('Email already in use');
+
+    const hashed = await bcrypt.hash(dto.password, 12);
+    const user = this.repo.create({ email: dto.email, password: hashed });
+    return this.repo.save(user);
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findByEmail(email: string) {
+    return this.repo.findOne({ where: { email } });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async validateUser(email: string, password: string): Promise<User> {
+    const user = await this.findByEmail(email);
+    if (!user) throw new UnauthorizedException('Invalid credentials');
+    const ok = await bcrypt.compare(password, user.password);
+    if (!ok) throw new UnauthorizedException('Invalid credentials');
+    return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async findMe(userId: string) {
+    // 구독 정보를 함께 로드 (left join)
+    return this.repo.findOne({
+      where: { id: userId },
+      relations: { subscriptions: true },
+    });
   }
 }
