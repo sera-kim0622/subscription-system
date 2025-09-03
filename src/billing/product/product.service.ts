@@ -1,26 +1,28 @@
-import { Injectable } from '@nestjs/common';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Product } from './entities/product.entity';
+import { Repository } from 'typeorm';
+import { GetProductsDto } from './dto/get-products.dto';
 
 @Injectable()
 export class ProductService {
-  create(createProductDto: CreateProductDto) {
-    return 'This action adds a new product';
-  }
+  constructor(
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
+  ) {}
 
-  findAll() {
-    return `This action returns all product`;
-  }
+  async findAll(query: GetProductsDto) {
+    const { type, sortBy = 'createdAt', order = 'DESC' } = query;
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
-  }
+    const result = await this.productRepository.find({
+      where: { type },
+      order: { [sortBy]: order },
+    });
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
-  }
+    if (result.length === 0) {
+      throw new NotFoundException('아직 상품이 등록되어있지 않습니다.');
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+    return { result };
   }
 }
