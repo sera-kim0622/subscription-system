@@ -11,7 +11,7 @@
    2. Jest + Supertest로 **단위 테스트/통합 테스트 작성**
    3. GitHub Actions에서 **테스트 자동화 파이프라인** 추가
    4. Coverage 리포트(`jest --coverage`)까지 CI에 연결
-   5. 정리: README에 "테스트 커버리지 + CI 연동" 스크린샷 첨부
+   5. 최종 정리: "테스트 커버리지 + CI 연동" 결과 첨부 예정
 
 ## Description
 
