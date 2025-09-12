@@ -6,7 +6,7 @@ export type PortOnePaymentStatus = 'PAID' | 'FAILED';
 
 export interface PortOneResult {
   /** 결제 트랜잭션 ID(고유 값으로 UUID) */
-  txId: string;
+  pgPaymentId?: string;
 
   /** 결제 상태 */
   status: PortOnePaymentStatus;
