@@ -1,3 +1,11 @@
+## 도메인
+
+https://www.sera-kim.shop
+
+## 시스템 아키텍쳐
+
+![Subscription system architecture](./subscription-system-diagram.png)
+
 ## 진행사항
 
 1. 테스트 자동화 정비
