@@ -44,18 +44,16 @@ jobs:
 
             echo "🧹 Resetting local repository to match remote..."
             git fetch origin main
-            git reset --hard origin/main    
-
-            # ✅ Secrets → 환경변수 export
-            export DB_USER='${{ secrets.DB_USER }}'
-            export DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
-            export DB_NAME='${{ secrets.DB_NAME }}'
-            export DB_HOST='${{ secrets.DB_HOST }}'
-            export DB_PORT='${{ secrets.DB_PORT }}'
+            git reset --hard origin/main
 
             echo "🐳 Building and running Docker containers..."
-
             docker compose down || true
+
+            DB_USER=${{ secrets.DB_USER }} \
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+            DB_NAME=${{ secrets.DB_NAME }} \
+            DB_HOST=subscription-db \
+            DB_PORT=5432 \
             docker compose up -d --build
 
-            echo "✅Deployment is complete!"
+            echo "✅ Deployment is complete!"
