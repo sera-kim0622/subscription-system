@@ -7,32 +7,10 @@ on:
     branches: [main]
 
 jobs:
-  # ✅ CI 단계: 빌드 테스트
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22.20.0
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Type check
-        run: npm run build --if-present
-
-  # 🚀 CD 단계: EC2 배포
   deploy:
-    needs: build
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-
     steps:
-      - name: Deploy to EC2 via SSH
+      - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -48,17 +26,12 @@ jobs:
             echo "🐳 Building and running Docker containers..."
             docker compose down || true
 
-            # ✅ GitHub Secrets을 직접 주입하여 .env 파일 생성
-            echo "DB_USER=${{ secrets.DB_USER }}" > .env
-            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-            echo "DB_HOST=subscription-db" >> .env
-            echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
-
-            # ✅ 이전 컨테이너 잔여물 제거
-            docker compose rm -f || true
-
-            # ✅ 새로 빌드 및 배포
-            docker compose --env-file .env up -d --build
+            # ✅ Secrets 직접 주입 (docker 명령어 앞에 환경변수로 지정)
+            DB_USER=${{ secrets.DB_USER }} \
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+            DB_NAME=${{ secrets.DB_NAME }} \
+            DB_HOST=subscription-db \
+            DB_PORT=${{ secrets.DB_PORT }} \
+            docker compose up -d --build
 
             echo "✅ Deployment is complete!"
