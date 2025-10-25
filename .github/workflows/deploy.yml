@@ -41,8 +41,10 @@ jobs:
           script: |
             cd /home/ubuntu/subscription-system
 
-            echo "📦 Pulling latest code..."
-            git pull origin main
+
+            echo "🧹 Resetting local repository to match remote..."
+            git fetch origin main
+            git reset --hard origin/main    
 
             # ✅ Secrets → 환경변수 export
             export DB_USER='${{ secrets.DB_USER }}'
