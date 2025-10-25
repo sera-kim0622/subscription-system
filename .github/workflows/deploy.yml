@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  # ✅ CI: 의존성 설치 + 타입 검사
+  # ✅ CI 단계: 빌드 테스트
   build:
     runs-on: ubuntu-latest
     steps:
@@ -25,7 +25,7 @@ jobs:
       - name: Type check
         run: npm run build --if-present
 
-  # 🚀 CD: EC2 서버 배포 (main 브랜치 push 시)
+  # 🚀 CD 단계: EC2 배포
   deploy:
     needs: build
     if: github.ref == 'refs/heads/main'
@@ -48,17 +48,17 @@ jobs:
             echo "🐳 Building and running Docker containers..."
             docker compose down || true
 
-            # ✅ 환경변수 안전하게 주입 (GitHub Secrets 사용)
-            export DB_USER=${{ secrets.DB_USER }}
-            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            export DB_NAME=${{ secrets.DB_NAME }}
-            export DB_HOST=subscription-db
-            export DB_PORT=5432
+            # ✅ GitHub Secrets을 직접 주입하여 .env 파일 생성
+            echo "DB_USER=${{ secrets.DB_USER }}" > .env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+            echo "DB_HOST=subscription-db" >> .env
+            echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
 
-            # 🔧 이전 컨테이너 잔여물 제거
+            # ✅ 이전 컨테이너 잔여물 제거
             docker compose rm -f || true
 
-            # 🧱 새 빌드 & 배포
-            docker compose up -d --build
+            # ✅ 새로 빌드 및 배포
+            docker compose --env-file .env up -d --build
 
             echo "✅ Deployment is complete!"
