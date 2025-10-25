@@ -25,14 +25,14 @@ jobs:
       - name: Type check
         run: npm run build --if-present
 
-  # 🚀 CD: EC2 서버 배포 (main 브랜치에 push될 때)
+  # 🚀 CD: EC2 서버 배포 (main 브랜치 push 시)
   deploy:
     needs: build
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to EC2
+      - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -41,7 +41,6 @@ jobs:
           script: |
             cd /home/ubuntu/subscription-system
 
-
             echo "🧹 Resetting local repository to match remote..."
             git fetch origin main
             git reset --hard origin/main
@@ -49,15 +48,17 @@ jobs:
             echo "🐳 Building and running Docker containers..."
             docker compose down || true
 
-            cat <<EOF > .env.tmp
-            DB_USER=${{ secrets.DB_USER }}
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            DB_NAME=${{ secrets.DB_NAME }}
-            DB_HOST=subscription-db
-            DB_PORT=5432
-            EOF
+            # ✅ 환경변수 안전하게 주입 (GitHub Secrets 사용)
+            export DB_USER=${{ secrets.DB_USER }}
+            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            export DB_NAME=${{ secrets.DB_NAME }}
+            export DB_HOST=subscription-db
+            export DB_PORT=5432
 
-            docker compose --env-file .env.tmp up -d --build
-            rm .env.tmp
+            # 🔧 이전 컨테이너 잔여물 제거
+            docker compose rm -f || true
+
+            # 🧱 새 빌드 & 배포
+            docker compose up -d --build
 
             echo "✅ Deployment is complete!"
