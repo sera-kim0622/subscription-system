@@ -44,17 +44,16 @@ jobs:
             echo "📦 Pulling latest code..."
             git pull origin main
 
+            # ✅ Secrets → 환경변수 export
+            export DB_USER='${{ secrets.DB_USER }}'
+            export DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
+            export DB_NAME='${{ secrets.DB_NAME }}'
+            export DB_HOST='${{ secrets.DB_HOST }}'
+            export DB_PORT='${{ secrets.DB_PORT }}'
+
             echo "🐳 Building and running Docker containers..."
+
             docker compose down || true
-
-            # ✅ GitHub Secrets에서 환경변수 안전하게 주입
-            docker compose up -d --build \
-            -e DB_USER=${{ secrets.DB_USER }} \
-            -e DB_PASS=${{ secrets.DB_PASS }} \
-            -e DB_NAME=${{ secrets.DB_NAME }} \
-            -e DB_HOST=${{ secrets.DB_HOST }} \
-            -e DB_PORT=${{ secrets.DB_PORT }}
-
             docker compose up -d --build
 
             echo "✅Deployment is complete!"
