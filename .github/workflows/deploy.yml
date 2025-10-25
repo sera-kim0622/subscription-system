@@ -49,11 +49,15 @@ jobs:
             echo "🐳 Building and running Docker containers..."
             docker compose down || true
 
-            DB_USER=${{ secrets.DB_USER }} \
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-            DB_NAME=${{ secrets.DB_NAME }} \
-            DB_HOST=subscription-db \
-            DB_PORT=5432 \
-            docker compose up -d --build
+            cat <<EOF > .env.tmp
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_HOST=subscription-db
+            DB_PORT=5432
+            EOF
+
+            docker compose --env-file .env.tmp up -d --build
+            rm .env.tmp
 
             echo "✅ Deployment is complete!"
