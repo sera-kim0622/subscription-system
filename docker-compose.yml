@@ -13,6 +13,13 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - app-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_NAME}']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
   subscription-app:
     build: .
     container_name: subscription
@@ -25,7 +32,10 @@ services:
     ports:
       - '3000:3000'
     depends_on:
-      - subscription-db
+      subscription-db:
+        condition: service_healthy
+    networks:
+      - app-network
 
 volumes:
   pgdata:
