@@ -9,11 +9,14 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
+import { JwtService } from '@nestjs/jwt';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private readonly repo: Repository<User>,
+    private readonly jwt: JwtService,
   ) {}
 
   async create(dto: CreateUserDto): Promise<User> {
@@ -32,16 +35,31 @@ export class UserService {
     }
   }
 
-  async findByEmail(email: string) {
-    return this.repo.findOne({ where: { email } });
-  }
+  async validateUser(dto: LoginDto): Promise<{ accessToken: string }> {
+    try {
+      const { email, password } = dto;
+      const user = await this.repo.findOne({ where: { email } });
 
-  async validateUser(email: string, password: string): Promise<User> {
-    const user = await this.findByEmail(email);
-    if (!user) throw new UnauthorizedException('Invalid credentials');
-    const ok = await bcrypt.compare(password, user.password);
-    if (!ok) throw new UnauthorizedException('Invalid credentials');
-    return user;
+      if (!user) {
+        throw new UnauthorizedException('존재하지 않는 이메일입니다.');
+      }
+
+      const passwordConfirm = await bcrypt.compare(password, user.password);
+      if (!passwordConfirm) {
+        throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
+      }
+
+      const token = await this.jwt.signAsync({
+        sub: user.id,
+        email: user.email,
+      });
+      return { accessToken: token };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new Error('로그인 중 알 수 없는 에러가 발생하였습니다.');
+    }
   }
 
   async findMe(userId: string) {

@@ -1,7 +1,5 @@
-// src/user/users.controller.ts
 import { Body, Controller, Get, Post, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { JwtService } from '@nestjs/jwt';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
@@ -10,10 +8,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 @ApiTags('users')
 @Controller('users')
 export class UserController {
-  constructor(
-    private readonly userService: UserService,
-    private readonly jwt: JwtService,
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
   @Post()
   async signUp(@Body() dto: CreateUserDto) {
@@ -24,9 +19,7 @@ export class UserController {
 
   @Post('login')
   async login(@Body() dto: LoginDto) {
-    const user = await this.userService.validateUser(dto.email, dto.password);
-    const token = await this.jwt.signAsync({ sub: user.id, email: user.email });
-    return { accessToken: token };
+    return await this.userService.validateUser(dto);
   }
 
   @Get('me')
