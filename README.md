@@ -39,6 +39,8 @@ yarn run start:prod
 
 ## Test
 
+jest-mock-extended : 모의 객체를 생성해주는 패키지
+
 ```bash
 # unit tests
 $ yarn run test
