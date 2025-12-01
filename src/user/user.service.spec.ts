@@ -2,17 +2,23 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { ConflictException } from '@nestjs/common';
+import {
+  ConflictException,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
 
 jest.mock('bcrypt', () => ({
   hash: jest.fn(),
+  compare: jest.fn(),
 }));
 
 let service: UserService;
 let userRepository;
-let jwtService: JwtService;
+let jwtService: DeepMockProxy<JwtService>;
 
 beforeEach(async () => {
   userRepository = {
@@ -20,6 +26,7 @@ beforeEach(async () => {
     create: jest.fn(),
     save: jest.fn(),
   };
+
   const module: TestingModule = await Test.createTestingModule({
     providers: [
       UserService,
@@ -29,16 +36,13 @@ beforeEach(async () => {
       },
       {
         provide: JwtService,
-        useValue: {
-          sign: jest.fn().mockReturnValue('mock_token'),
-          verify: jest.fn().mockReturnValue({ userId: 1 }),
-        },
+        useValue: mockDeep<JwtService>(),
       },
     ],
   }).compile();
 
   service = module.get<UserService>(UserService);
-  jwtService = module.get<JwtService>(JwtService);
+  jwtService = module.get(JwtService);
 });
 
 describe('회원가입', () => {
@@ -81,11 +85,53 @@ describe('회원가입', () => {
 });
 
 describe('가입한 회원(로그인)인지 확인하는 함수', () => {
-  it('존재하지 않는 회원일 경우 UnauthorizedException을 반환', async () => {});
+  it('존재하지 않는 회원일 경우 UnauthorizedException을 반환', async () => {
+    userRepository.findOne.mockResolvedValue(undefined);
+    await expect(
+      service.validateUser({
+        email: 'sera.kim@gmail.com',
+        password: 'pass1234',
+      }),
+    ).rejects.toThrow(UnauthorizedException);
 
-  it('비밀번호가 일치하지 않는 경우 UnauthorizedException을 반환', async () => {});
+    userRepository.findOne.mockResolvedValue(undefined);
+    await expect(
+      service.validateUser({
+        email: 'sera.kim@gmail.com',
+        password: 'pass1234',
+      }),
+    ).rejects.toThrow('존재하지 않는 이메일입니다');
+  });
 
-  it('로그인 중 알 수 없는 에러가 발생했을 때 에러 반환', async () => {});
+  it('비밀번호가 일치하지 않는 경우 UnauthorizedException을 반환', async () => {
+    userRepository.findOne.mockResolvedValue({ id: 1 });
+    const compareError = jest.fn().mockResolvedValue(false);
+    (bcrypt.compare as jest.Mock) = compareError;
+
+    await expect(
+      service.validateUser({
+        email: 'sera.kim@gmail.com',
+        password: 'pass1234',
+      }),
+    ).rejects.toThrow(
+      new UnauthorizedException('비밀번호가 일치하지 않습니다.'),
+    );
+  });
+
+  it('로그인 중 알 수 없는 에러가 발생했을 때 에러 반환', async () => {
+    userRepository.findOne.mockResolvedValue({ id: 1 });
+    // 비밀번호 일치시키는 로직
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+    // jwt발급 중 에러 발생
+    jwtService.signAsync.mockRejectedValue(new Error('jwt error'));
+    await expect(
+      service.validateUser({
+        email: 'sera.kim@gmail.com',
+        password: 'pass1234',
+      }),
+    ).rejects.toThrow(InternalServerErrorException);
+  });
 
   it('로그인에 성공하여 accessToken을 반환', async () => {});
 });

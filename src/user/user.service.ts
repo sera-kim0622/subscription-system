@@ -3,6 +3,7 @@ import {
   ConflictException,
   UnauthorizedException,
   HttpException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -36,8 +37,8 @@ export class UserService {
   }
 
   async validateUser(dto: LoginDto): Promise<{ accessToken: string }> {
+    const { email, password } = dto;
     try {
-      const { email, password } = dto;
       const user = await this.repo.findOne({ where: { email } });
 
       if (!user) {
@@ -49,11 +50,19 @@ export class UserService {
         throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
       }
 
-      const token = await this.jwt.signAsync({
-        sub: user.id,
-        email: user.email,
-      });
-      return { accessToken: token };
+      let accessToken;
+      try {
+        accessToken = await this.jwt.signAsync({
+          sub: user.id,
+          email: user.email,
+        });
+      } catch (error) {
+        throw new InternalServerErrorException(
+          'JWT 에러 : 환경설정 및 payload값을 확인해주세요.',
+        );
+      }
+
+      return { accessToken };
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
