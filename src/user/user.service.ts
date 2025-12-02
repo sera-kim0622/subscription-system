@@ -4,6 +4,7 @@ import {
   UnauthorizedException,
   HttpException,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -43,37 +44,30 @@ export class UserService {
 
   async login(dto: LoginDto): Promise<{ accessToken: string }> {
     const { email, password } = dto;
-    try {
-      const user = await this.userRepo.findOne({ where: { email } });
+    const user = await this.userRepo.findOne({ where: { email } });
 
-      if (!user) {
-        throw new UnauthorizedException('존재하지 않는 이메일입니다.');
-      }
-
-      const passwordConfirm = await bcrypt.compare(password, user.password);
-      if (!passwordConfirm) {
-        throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
-      }
-
-      let accessToken;
-      try {
-        accessToken = await this.jwt.signAsync({
-          sub: user.id,
-          email: user.email,
-        });
-      } catch (error) {
-        throw new InternalServerErrorException(
-          'JWT 에러 : 환경설정 및 payload값을 확인해주세요.',
-        );
-      }
-
-      return { accessToken };
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      throw new Error('로그인 중 알 수 없는 에러가 발생하였습니다.');
+    if (!user) {
+      throw new UnauthorizedException('존재하지 않는 이메일입니다.');
     }
+
+    const passwordConfirm = await bcrypt.compare(password, user.password);
+    if (!passwordConfirm) {
+      throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
+    }
+
+    let accessToken;
+    try {
+      accessToken = await this.jwt.signAsync({
+        sub: user.id,
+        email: user.email,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'JWT 에러 : 환경설정 및 payload값을 확인해주세요.',
+      );
+    }
+
+    return { accessToken };
   }
 
   async getUser(userId: string): Promise<GetUserOutputDto> {
@@ -81,6 +75,11 @@ export class UserService {
       where: { id: userId },
       relations: { subscriptions: true, payments: true },
     });
+
+    if (!user) {
+      throw new NotFoundException('존재하지 않는 사용자입니다.');
+    }
+
     return user;
   }
 }
