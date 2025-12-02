@@ -88,7 +88,7 @@ describe('가입한 회원(로그인)인지 확인하는 함수', () => {
   it('존재하지 않는 회원일 경우 UnauthorizedException을 반환', async () => {
     userRepository.findOne.mockResolvedValue(undefined);
     await expect(
-      service.validateUser({
+      service.login({
         email: 'sera.kim@gmail.com',
         password: 'pass1234',
       }),
@@ -96,7 +96,7 @@ describe('가입한 회원(로그인)인지 확인하는 함수', () => {
 
     userRepository.findOne.mockResolvedValue(undefined);
     await expect(
-      service.validateUser({
+      service.login({
         email: 'sera.kim@gmail.com',
         password: 'pass1234',
       }),
@@ -109,7 +109,7 @@ describe('가입한 회원(로그인)인지 확인하는 함수', () => {
     (bcrypt.compare as jest.Mock) = compareError;
 
     await expect(
-      service.validateUser({
+      service.login({
         email: 'sera.kim@gmail.com',
         password: 'pass1234',
       }),
@@ -124,14 +124,32 @@ describe('가입한 회원(로그인)인지 확인하는 함수', () => {
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
     // jwt발급 중 에러 발생
+    // toThrow에 들어가는 에러 객체가 그냥 Error 객체여도 같은 결과를 낸다.
+    // Error객체가 부모클래스고 InternalServerErrorException외에 nest에서
+    // 제공하는 http기반 에러는 Error클래스를 상속받아 사용하기 때문에 같다고 나온다.
+    // 메세지를 포함하여 굳이 더 엄격한 검사를 하지 않은 이유는 비즈니스적으로
+    // 중요하지 않은 내용이기 떄문이다. 에러 메세지는 상황에 따라 자주 변경될 수 있고
+    // 비즈니스에 영향을 크게 주는 내용이 아니기 때문이다.
     jwtService.signAsync.mockRejectedValue(new Error('jwt error'));
     await expect(
-      service.validateUser({
+      service.login({
         email: 'sera.kim@gmail.com',
         password: 'pass1234',
       }),
     ).rejects.toThrow(InternalServerErrorException);
   });
 
-  it('로그인에 성공하여 accessToken을 반환', async () => {});
+  it('로그인에 성공하여 accessToken을 반환', async () => {
+    userRepository.findOne.mockResolvedValue({ id: 1 });
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+    jwtService.signAsync.mockResolvedValue('access-token');
+    const result = await service.login({
+      email: 'sera.kim@gmail.com',
+      password: 'pass1234',
+    });
+    expect(result).toEqual({ accessToken: 'access-token' });
+    expect(userRepository.findOne).toHaveBeenCalled();
+    expect(jwtService.signAsync).toHaveBeenCalled();
+    expect(bcrypt.compare).toHaveBeenCalled();
+  });
 });
