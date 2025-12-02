@@ -22,13 +22,10 @@ export class UserController {
     return await this.userService.login(dto);
   }
 
-  @Get('me')
+  @Get('profile')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  async me(@Req() req: any) {
-    const me = await this.userService.findMe(req.user.userId);
-    // password 제외
-    const { password, ...safe } = me ?? {};
-    return safe;
+  async showProfile(@Req() req: any) {
+    return await this.userService.getUser(req.user.userId);
   }
 }
