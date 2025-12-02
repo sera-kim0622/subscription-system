@@ -68,9 +68,7 @@ describe('회원가입', () => {
       id: 1,
       email: 'sera.kim@gmail.com',
     });
-    (bcrypt.hash as jest.Mock).mockResolvedValue('hashed');
 
-    const hash = await bcrypt.hash('pass1234', 12);
     const result = await service.create({
       email: 'sera.kim@gmail.com',
       password: 'pass1234',
@@ -79,7 +77,7 @@ describe('회원가입', () => {
     expect(userRepository.findOne).toHaveBeenCalledTimes(1);
     expect(userRepository.create).toHaveBeenCalledWith({
       email: 'sera.kim@gmail.com',
-      password: hash,
+      password: 'pass1234',
     });
   });
 });
@@ -152,4 +150,8 @@ describe('가입한 회원(로그인)인지 확인하는 함수', () => {
     expect(jwtService.signAsync).toHaveBeenCalled();
     expect(bcrypt.compare).toHaveBeenCalled();
   });
+});
+
+describe('내 정보 조회', () => {
+  it('', () => {});
 });

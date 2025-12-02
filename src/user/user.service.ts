@@ -28,7 +28,6 @@ export class UserService {
       });
       if (exists) throw new ConflictException('Email already in use');
 
-      // const hashed = await bcrypt.hash(dto.password, 12);
       const user = this.userRepo.create({
         email: dto.email,
         password: dto.password,
@@ -77,8 +76,8 @@ export class UserService {
     }
   }
 
-  getUser(userId: string): Promise<GetUserOutputDto> {
-    const user = this.userRepo.findOne({
+  async getUser(userId: string): Promise<GetUserOutputDto> {
+    const user = await this.userRepo.findOne({
       where: { id: userId },
       relations: { subscriptions: true, payments: true },
     });
