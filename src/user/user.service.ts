@@ -12,22 +12,28 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
+import { GetUserOutputDto } from './dto/get-user.dto';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User) private readonly repo: Repository<User>,
+    @InjectRepository(User) private readonly userRepo: Repository<User>,
     private readonly jwt: JwtService,
   ) {}
 
   async create(dto: CreateUserDto): Promise<User> {
     try {
-      const exists = await this.repo.findOne({ where: { email: dto.email } });
+      const exists = await this.userRepo.findOne({
+        where: { email: dto.email },
+      });
       if (exists) throw new ConflictException('Email already in use');
 
-      const hashed = await bcrypt.hash(dto.password, 12);
-      const user = this.repo.create({ email: dto.email, password: hashed });
-      return this.repo.save(user);
+      // const hashed = await bcrypt.hash(dto.password, 12);
+      const user = this.userRepo.create({
+        email: dto.email,
+        password: dto.password,
+      });
+      return this.userRepo.save(user);
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -39,7 +45,7 @@ export class UserService {
   async login(dto: LoginDto): Promise<{ accessToken: string }> {
     const { email, password } = dto;
     try {
-      const user = await this.repo.findOne({ where: { email } });
+      const user = await this.userRepo.findOne({ where: { email } });
 
       if (!user) {
         throw new UnauthorizedException('존재하지 않는 이메일입니다.');
@@ -71,11 +77,11 @@ export class UserService {
     }
   }
 
-  async findMe(userId: string) {
-    // 구독 정보를 함께 로드 (left join)
-    return this.repo.findOne({
+  getUser(userId: string): Promise<GetUserOutputDto> {
+    const user = this.userRepo.findOne({
       where: { id: userId },
-      relations: { subscriptions: true },
+      relations: { subscriptions: true, payments: true },
     });
+    return user;
   }
 }
