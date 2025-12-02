@@ -36,7 +36,7 @@ export class UserService {
     }
   }
 
-  async validateUser(dto: LoginDto): Promise<{ accessToken: string }> {
+  async login(dto: LoginDto): Promise<{ accessToken: string }> {
     const { email, password } = dto;
     try {
       const user = await this.repo.findOne({ where: { email } });

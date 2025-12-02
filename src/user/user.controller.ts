@@ -19,7 +19,7 @@ export class UserController {
 
   @Post('login')
   async login(@Body() dto: LoginDto) {
-    return await this.userService.validateUser(dto);
+    return await this.userService.login(dto);
   }
 
   @Get('me')
