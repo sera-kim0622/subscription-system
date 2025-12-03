@@ -5,6 +5,7 @@ import { User } from './entities/user.entity';
 import {
   ConflictException,
   InternalServerErrorException,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
@@ -153,5 +154,16 @@ describe('가입한 회원(로그인)인지 확인하는 함수', () => {
 });
 
 describe('내 정보 조회', () => {
-  it('', () => {});
+  it('존재하지 않는 유저일 경우 에러 반환', async () => {
+    userRepository.findOne.mockResolvedValue(undefined);
+    await expect(service.getUser(1)).rejects.toThrow(NotFoundException);
+    expect(userRepository.findOne).toHaveBeenCalledWith({
+      where: { id: 1 },
+      relations: { payments: true, subscriptions: true },
+    });
+  });
+
+  it('존재하는 유저일 경우 비밀번호를 제외한 모든 유저정보 반환', () => {
+    
+  });
 });

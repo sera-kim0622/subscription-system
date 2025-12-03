@@ -70,7 +70,7 @@ export class UserService {
     return { accessToken };
   }
 
-  async getUser(userId: string): Promise<GetUserOutputDto> {
+  async getUser(userId: number): Promise<GetUserOutputDto> {
     const user = await this.userRepo.findOne({
       where: { id: userId },
       relations: { subscriptions: true, payments: true },
