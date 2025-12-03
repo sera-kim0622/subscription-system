@@ -7,7 +7,7 @@ import {
 
 export abstract class CoreEntity {
   @PrimaryGeneratedColumn({ type: 'bigint', name: 'id' })
-  id: string;
+  id: number;
 
   @CreateDateColumn({
     type: 'timestamp',
