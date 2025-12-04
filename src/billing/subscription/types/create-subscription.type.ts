@@ -1,4 +1,7 @@
-export type PeriodType = 'MONTHLY' | 'YEARLY';
+export enum PeriodType {
+  MONTHLY = 'MONTHLY',
+  YEARLY = 'YEARLY',
+}
 
 export interface CreateSubscriptionInput {
   userId: number;
