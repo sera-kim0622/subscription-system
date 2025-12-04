@@ -8,4 +8,5 @@ module.exports = {
   moduleNameMapper: {
     '^src/(.*)$': '<rootDir>/$1',
   },
+  coveragePathIgnorePatterns: ['.*\\.entity\\.ts$'],
 };
