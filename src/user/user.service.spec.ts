@@ -163,7 +163,16 @@ describe('내 정보 조회', () => {
     });
   });
 
-  it('존재하는 유저일 경우 비밀번호를 제외한 모든 유저정보 반환', () => {
-    
+  it('존재하는 유저일 경우 비밀번호를 제외한 모든 유저정보 반환', async () => {
+    const mockUser = {
+      id: 1,
+      email: 'sera.kim@gmail.com',
+      subscriptions: [],
+      payments: [],
+    };
+    userRepository.findOne.mockResolvedValue(mockUser);
+
+    const result = await service.getUser(1);
+    expect(result).toEqual(mockUser);
   });
 });
