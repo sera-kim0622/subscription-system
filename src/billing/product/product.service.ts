@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
 import { GetProductsDto } from './dto/get-products.dto';
+import { CreateProductInputDto } from './dto/create-product.dto';
 
 @Injectable()
 export class ProductService {
@@ -11,7 +12,7 @@ export class ProductService {
     private readonly productRepository: Repository<Product>,
   ) {}
 
-  async findAll(query: GetProductsDto) {
+  async getProducts(query: GetProductsDto) {
     const { type, sortBy = 'createdAt', order = 'DESC' } = query;
 
     const result = await this.productRepository.find({
@@ -24,5 +25,12 @@ export class ProductService {
     }
 
     return { result };
+  }
+
+  async createProduct(body: CreateProductInputDto): Promise<Product> {
+    const { name, type, price } = body;
+
+    const object = this.productRepository.create({ name, type, price });
+    return await this.productRepository.save(object);
   }
 }
