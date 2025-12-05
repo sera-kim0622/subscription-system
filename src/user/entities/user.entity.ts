@@ -5,6 +5,11 @@ import { Payment } from 'src/billing/payment/entities/payment.entity';
 
 import * as bcrypt from 'bcrypt';
 
+export enum UserRole {
+  ADMIN = 'ADMIN',
+  USER = 'USER',
+}
+
 @Entity('user')
 export class User extends CoreEntity {
   @Column({ type: 'varchar', length: 255, unique: true, name: 'email' })
@@ -12,6 +17,9 @@ export class User extends CoreEntity {
 
   @Column({ type: 'varchar', length: 255, name: 'password', select: false })
   password: string;
+
+  @Column({ type: 'varchar', length: 100, name: 'role', nullable: true })
+  role: UserRole;
 
   @OneToMany(() => Subscription, (subscription) => subscription.user)
   subscriptions: Subscription[];
