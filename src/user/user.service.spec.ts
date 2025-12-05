@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { User } from './entities/user.entity';
+import { User, UserRole } from './entities/user.entity';
 import {
   ConflictException,
   InternalServerErrorException,
@@ -50,7 +50,11 @@ describe('회원가입', () => {
   it('이미 존재하는 이메일이면 에러를 반환한다.', async () => {
     userRepository.findOne.mockResolvedValue({ id: 1 });
     await expect(
-      service.create({ email: 'sera.kim@gmail.com', password: 'pass1234' }),
+      service.create({
+        email: 'sera.kim@gmail.com',
+        password: 'pass1234',
+        role: UserRole.ADMIN,
+      }),
     ).rejects.toThrow(ConflictException);
   });
 
@@ -58,7 +62,11 @@ describe('회원가입', () => {
     const error = new Error('회원가입 도중 알 수 없는 에러가 발생하였습니다.');
     userRepository.findOne.mockRejectedValue(error);
     await expect(
-      service.create({ email: 'sera.kim@gmail.com', password: 'pass1234' }),
+      service.create({
+        email: 'sera.kim@gmail.com',
+        password: 'pass1234',
+        role: UserRole.ADMIN,
+      }),
     ).rejects.toThrow(error);
   });
 
@@ -73,6 +81,7 @@ describe('회원가입', () => {
     const result = await service.create({
       email: 'sera.kim@gmail.com',
       password: 'pass1234',
+      role: UserRole.ADMIN,
     });
     expect(result).toEqual({ id: 1, email: 'sera.kim@gmail.com' });
     expect(userRepository.findOne).toHaveBeenCalledTimes(1);
