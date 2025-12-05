@@ -20,10 +20,6 @@ export class ProductService {
       order: { [sortBy]: order },
     });
 
-    if (result.length === 0) {
-      throw new NotFoundException('아직 상품이 등록되어있지 않습니다.');
-    }
-
     return { result };
   }
 
