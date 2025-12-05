@@ -32,6 +32,7 @@ export class UserService {
       const user = this.userRepo.create({
         email: dto.email,
         password: dto.password,
+        role: dto.role,
       });
       return this.userRepo.save(user);
     } catch (error) {
@@ -44,7 +45,10 @@ export class UserService {
 
   async login(dto: LoginDto): Promise<{ accessToken: string }> {
     const { email, password } = dto;
-    const user = await this.userRepo.findOne({ where: { email } });
+    const user = await this.userRepo.findOne({
+      where: { email },
+      select: ['id', 'email', 'password', 'role'],
+    });
 
     if (!user) {
       throw new UnauthorizedException('존재하지 않는 이메일입니다.');
@@ -60,6 +64,7 @@ export class UserService {
       accessToken = await this.jwt.signAsync({
         sub: user.id,
         email: user.email,
+        role: user.role,
       });
     } catch (error) {
       throw new InternalServerErrorException(
