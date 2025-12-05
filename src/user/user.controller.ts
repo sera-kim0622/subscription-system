@@ -26,6 +26,7 @@ export class UserController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   async showProfile(@Req() req: any) {
-    return await this.userService.getUser(req.user.userId);
+    const userId = Number(req.user.userId);
+    return await this.userService.getUser(userId);
   }
 }
