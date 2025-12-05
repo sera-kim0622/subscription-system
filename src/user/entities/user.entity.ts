@@ -18,7 +18,7 @@ export class User extends CoreEntity {
   @Column({ type: 'varchar', length: 255, name: 'password', select: false })
   password: string;
 
-  @Column({ type: 'varchar', length: 100, name: 'role', nullable: true })
+  @Column({ type: 'varchar', length: 100, name: 'role' })
   role: UserRole;
 
   @OneToMany(() => Subscription, (subscription) => subscription.user)
