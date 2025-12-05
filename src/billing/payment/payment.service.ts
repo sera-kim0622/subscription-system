@@ -49,7 +49,7 @@ export class PaymentService {
       const subscription = await this.subscriptionService.createSubscription({
         userId,
         productId,
-        period: product.type as 'MONTHLY' | 'YEARLY',
+        period: product.type,
         paymentId: 1,
       });
 

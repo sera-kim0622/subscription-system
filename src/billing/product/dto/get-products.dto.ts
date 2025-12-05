@@ -1,5 +1,6 @@
 import { IsIn, IsOptional } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { PeriodType } from '../../subscription/types';
 
 export class GetProductsDto {
   @ApiPropertyOptional({
@@ -8,7 +9,7 @@ export class GetProductsDto {
   })
   @IsOptional()
   @IsIn(['MONTHLY', 'YEARLY'])
-  type?: 'MONTHLY' | 'YEARLY';
+  type?: PeriodType;
 
   @ApiPropertyOptional({
     enum: ['createdAt', 'price', 'name'],
