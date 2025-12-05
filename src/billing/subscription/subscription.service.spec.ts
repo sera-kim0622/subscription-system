@@ -118,4 +118,35 @@ describe('결제 후 구독생성하는 함수 테스트', () => {
     expect(result.expiredAt.getMonth()).toBe(expected.getMonth());
     expect(result.expiredAt.getDate()).toBe(expected.getDate());
   });
+
+  it('연 구독이 성공적으로 생성되어 구독 정보를 반환', async () => {
+    subscriptionRepository.findOne.mockResolvedValue(undefined);
+    productRepository.findOne.mockResolvedValue({ id: 1 });
+
+    // 가짜 날짜 생성
+    const fakeTime = new Date(2025, 11, 4, 20, 36);
+    jest.useFakeTimers().setSystemTime(fakeTime);
+
+    // 객체 생성
+    subscriptionRepository.create.mockImplementation((data) => data);
+    subscriptionRepository.save.mockImplementation(async (sub) => {
+      return { ...sub, id: 1 };
+    });
+
+    const input = {
+      userId: 1,
+      productId: 1,
+      period: PeriodType.YEARLY,
+      paymentId: 1,
+    };
+
+    const result = await subscriptionService.createSubscription(input);
+
+    // 한 달 후의 날짜가 유효기간으로 설정된 구독권이 발급되었는지 확인
+    const expected = new Date(fakeTime);
+    expected.setFullYear(expected.getFullYear() + 1);
+    expect(result.expiredAt.getFullYear()).toBe(expected.getFullYear());
+    expect(result.expiredAt.getMonth()).toBe(expected.getMonth());
+    expect(result.expiredAt.getDate()).toBe(expected.getDate());
+  });
 });
