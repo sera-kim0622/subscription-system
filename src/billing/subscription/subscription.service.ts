@@ -24,7 +24,9 @@ export class SubscriptionService {
    * @param input 유저정보, 상품정보, 결제정보
    * @returns
    */
-  async createSubscription(input: CreateSubscriptionInput) {
+  async createSubscription(
+    input: CreateSubscriptionInput,
+  ): Promise<Subscription> {
     const { userId, productId, period, paymentId } = input;
 
     // 동일 거래 중복 방지
@@ -54,7 +56,11 @@ export class SubscriptionService {
       expiredAt,
     } as any);
 
-    return this.subscriptionRepository.save(subscription);
+    const result = (await this.subscriptionRepository.save(
+      subscription,
+    )) as unknown as Subscription;
+
+    return result;
   }
 
   /**
@@ -63,7 +69,7 @@ export class SubscriptionService {
    * @param type : MONTHLY / YEARLY
    * @returns 계산된 날짜
    */
-  private _calculateExpirationDate(start: Date, type: PeriodType) {
+  _calculateExpirationDate(start: Date, type: PeriodType) {
     const estimateDate = new Date(start);
     if (type === 'YEARLY') {
       estimateDate.setFullYear(estimateDate.getFullYear() + 1);
