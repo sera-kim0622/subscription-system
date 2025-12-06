@@ -88,6 +88,7 @@ describe('회원가입', () => {
     expect(userRepository.create).toHaveBeenCalledWith({
       email: 'sera.kim@gmail.com',
       password: 'pass1234',
+      role: UserRole.ADMIN,
     });
   });
 });
