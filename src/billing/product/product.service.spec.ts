@@ -65,3 +65,35 @@ describe('구독 상품정보 조회', () => {
     expect(result).toEqual({ result: mockProducts });
   });
 });
+
+describe('상품 생성', () => {
+  it('상품 생성 중 오류가 발생하여 에러가 발생', async () => {
+    const body = {
+      name: 'BASIC_TEST',
+      type: PeriodType.MONTHLY,
+      price: 100000,
+    };
+    productRepository.create.mockResolvedValue(body);
+    productRepository.save.mockRejectedValue(new Error());
+    const result = productService.createProduct(body);
+    await expect(result).rejects.toThrow(Error);
+  });
+
+  it('상품을 저장 후 생성된 엔터티에 대한 정보를 반환', async () => {
+    const body = {
+      name: 'BASIC_TEST',
+      type: PeriodType.MONTHLY,
+      price: 100000,
+    };
+    productRepository.create.mockResolvedValue(body);
+
+    const currentDate = new Date();
+    productRepository.save.mockResolvedValue({
+      ...body,
+      id: 1,
+      createdAt: currentDate,
+    });
+    const result = await productService.createProduct(body);
+    expect(result).toEqual({ ...body, id: 1, createdAt: currentDate });
+  });
+});
