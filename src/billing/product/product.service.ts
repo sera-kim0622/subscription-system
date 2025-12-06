@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
@@ -27,6 +27,12 @@ export class ProductService {
     const { name, type, price } = body;
 
     const object = this.productRepository.create({ name, type, price });
-    return await this.productRepository.save(object);
+    try {
+      return await this.productRepository.save(object);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        '상품을 DB에 저장하던 중 오류가 발생하였습니다.',
+      );
+    }
   }
 }
