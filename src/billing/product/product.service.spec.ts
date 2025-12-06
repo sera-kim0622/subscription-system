@@ -34,7 +34,7 @@ describe('구독 상품정보 조회', () => {
 
     const result = productService.getProducts({
       type: PeriodType.MONTHLY,
-      order: 'DESC',
+      order: undefined,
     });
     await expect(result).rejects.toThrow(Error);
   });
@@ -79,7 +79,7 @@ describe('상품 생성', () => {
     await expect(result).rejects.toThrow(Error);
   });
 
-  it('상품을 저장 후 생성된 엔터티에 대한 정보를 반환', async () => {
+  it('월간 상품을 저장 후 생성된 엔터티에 대한 정보를 반환', async () => {
     const body = {
       name: 'BASIC_TEST',
       type: PeriodType.MONTHLY,
