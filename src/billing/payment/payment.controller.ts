@@ -1,7 +1,7 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { PaymentService } from './payment.service';
-import { PurchaseDto } from './dto/purchase.dto';
+import { PurchaseInputDto } from './dto/purchase.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CurrentUser } from 'src/auth/decorator/current-user.decorator.ts';
 
@@ -14,7 +14,7 @@ export class PaymentController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post('purchase')
-  purchase(@Body() dto: PurchaseDto, @CurrentUser('id') userId: number) {
+  purchase(@Body() dto: PurchaseInputDto, @CurrentUser('id') userId: number) {
     return this.paymentService.purchase(dto, userId);
   }
 }

@@ -1,6 +1,6 @@
 import { IsIn, IsNotEmpty, IsOptional } from 'class-validator';
 
-export class PurchaseDto {
+export class PurchaseInputDto {
   /** 구매할 상품 ID */
   @IsNotEmpty()
   productId: number;
@@ -9,4 +9,8 @@ export class PurchaseDto {
   @IsOptional()
   @IsIn(['success', 'fail'])
   simulate?: 'success' | 'fail';
+}
+
+export class PurchaseOutputDto {
+  
 }
