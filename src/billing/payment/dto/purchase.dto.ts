@@ -3,6 +3,7 @@ import { PeriodType } from '../../subscription/types';
 import { Subscription } from '../../subscription/entities/subscription.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Payment } from '../entities/payment.entity';
+import { PortOneResult } from '../portone/portone.types';
 
 export class PurchaseInputDto {
   /** 구매할 상품 ID */
@@ -27,5 +28,6 @@ export class PurchaseOutputDto {
   order: PurchaseOrderResult;
   payment?: Payment | null;
   subscription?: Subscription | null;
-  issuedSubscriptionResult?: string;
+  resultMessage: string;
+  pgPaymentResult: PortOneResult;
 }

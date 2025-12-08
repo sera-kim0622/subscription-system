@@ -131,9 +131,10 @@ export class PaymentService {
         },
         payment: paymentResult,
         subscription: subscription ?? null,
-        issuedSubscriptionResult: subscription
+        resultMessage: subscription
           ? '결제 완료 후 구독권 발급에 성공하였습니다.'
           : '결제는 성공하였으나 구독권 발급에 실패하였습니다.',
+        pgPaymentResult,
       };
     } else if (paymentResult.status === PAYMENT_STATUS.FAIL) {
       return {
@@ -143,6 +144,8 @@ export class PaymentService {
           type: product.type,
           price: product.price,
         },
+        resultMessage: '결제에 실패하였습니다.',
+        pgPaymentResult,
       };
     }
   }
