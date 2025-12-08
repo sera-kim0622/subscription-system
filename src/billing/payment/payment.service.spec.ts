@@ -1,13 +1,61 @@
+import { Test, TestingModule } from '@nestjs/testing';
 import { SubscriptionService } from '../subscription/subscription.service';
 import { PaymentService } from './payment.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Product } from '../product/entities/product.entity';
+import { Payment } from './entities/payment.entity';
+import { UserService } from '../../user/user.service';
 
 let paymentService: PaymentService;
-let productRepository;
-let subscriptionService: SubscriptionService;
+let paymentRepository: any;
+let productRepository: any;
+let userService: any;
+let subscriptionService: any;
 
 beforeEach(async () => {
-  productRepository = {};
+  productRepository = {
+    findOne: jest.fn(),
+  };
+
+  paymentRepository = {
+    create: jest.fn(),
+    save: jest.fn(),
+  };
+
+  userService = {
+    getUser: jest.fn(),
+  };
+
+  subscriptionService = {
+    getCurrentSubscription: jest.fn(),
+    createSubscription: jest.fn(),
+  };
+
+  const module: TestingModule = await Test.createTestingModule({
+    providers: [
+      PaymentService,
+      {
+        provide: getRepositoryToken(Product),
+        useValue: productRepository,
+      },
+      {
+        provide: getRepositoryToken(Payment),
+        useValue: productRepository,
+      },
+      {
+        provide: UserService,
+        useValue: userService,
+      },
+      {
+        provide: SubscriptionService,
+        useValue: subscriptionService,
+      },
+    ],
+  }).compile();
+
+  paymentService = module.get<PaymentService>(PaymentService);
 });
+
 describe('결제 함수 테스트', () => {
   it('결제하려는 상품이 존재하지 않을 경우 에러를 반환', () => {});
 
