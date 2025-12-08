@@ -78,4 +78,19 @@ export class SubscriptionService {
     }
     return estimateDate;
   }
+
+  /**
+   * @description 유저의 현재 구독 정보 확인하는 함수
+   */
+  async getCurrentSubscription(userId: number) {
+    const subscription = await this.subscriptionRepository.findOne({
+      where: { user: { id: userId } },
+    });
+
+    if (!subscription) {
+      return null;
+    }
+
+    return subscription;
+  }
 }
