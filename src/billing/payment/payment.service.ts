@@ -16,7 +16,9 @@ export class PaymentService {
     private readonly subscriptionService: SubscriptionService,
   ) {}
 
-  /** 모킹: PortOne 호출 대신 내부에서 결과 생성 */
+  /**
+   * @description 결제 후 구독생성하는 함수
+   */
   async purchase(dto: PurchaseInputDto, userId: number) {
     const { productId, simulate } = dto;
 
