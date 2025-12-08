@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { randomUUID } from 'crypto';
 
 import { Product } from '../product/entities/product.entity';
-import { PurchaseDto } from './dto/purchase.dto';
+import { PurchaseInputDto } from './dto/purchase.dto';
 import { PortOneResult } from './portone/portone.types';
 import { SubscriptionService } from '../subscription/subscription.service';
 
@@ -17,19 +17,19 @@ export class PaymentService {
   ) {}
 
   /** 모킹: PortOne 호출 대신 내부에서 결과 생성 */
-  async purchase(dto: PurchaseDto, userId: number) {
+  async purchase(dto: PurchaseInputDto, userId: number) {
     const { productId, simulate } = dto;
 
-    // 존재하는 상품인지 확인
+    // 1. 현재 판매중인 상품인지 확인
     const product = await this.productRepo.findOne({
-      where: { id: productId } as any,
+      where: { id: productId },
     });
 
     if (!product) {
       throw new NotFoundException('존재하지 않는 상품입니다.');
     }
 
-    // 모킹 결제 결과 만들기 (최소 스키마)
+    // ===== 가짜 결제 모델 만드는 로직 =====
     const isFail = simulate === 'fail';
     const pgPaymentId = randomUUID();
 
@@ -44,7 +44,8 @@ export class PaymentService {
           paidAt: new Date().toISOString(),
         };
 
-    // 성공인 경우 결제 생성 -> 구독 생성(한 건당 한 번)
+    // 결제 성공의 경우 : 구독 생성, 구독권과 결제 내역 반환
+    // 결제 실패의 경우 : 결제 내역 반환
     if (result.status === 'PAID') {
       const subscription = await this.subscriptionService.createSubscription({
         userId,
@@ -64,17 +65,17 @@ export class PaymentService {
         },
         subscription,
       };
+    } else {
+      return {
+        provider: 'PORTONE_MOCK',
+        result,
+        order: {
+          productId: product.id,
+          name: product.name,
+          type: product.type,
+          price: product.price,
+        },
+      };
     }
-    // ✅ MVP: DB 기록/구독 활성화 없음. 오직 결과만 반환
-    return {
-      provider: 'PORTONE_MOCK',
-      result,
-      order: {
-        productId: product.id,
-        name: product.name,
-        type: product.type,
-        price: product.price,
-      },
-    };
   }
 }
