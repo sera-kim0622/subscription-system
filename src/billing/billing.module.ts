@@ -9,9 +9,13 @@ import { Product } from './product/entities/product.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Subscription } from './subscription/entities/subscription.entity';
 import { Payment } from './payment/entities/payment.entity';
+import { UserModule } from '../user/user.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Product, Subscription, Payment])],
+  imports: [
+    TypeOrmModule.forFeature([Product, Subscription, Payment]),
+    UserModule,
+  ],
   controllers: [PaymentController, SubscriptionController, ProductController],
   providers: [PaymentService, SubscriptionService, ProductService],
 })
