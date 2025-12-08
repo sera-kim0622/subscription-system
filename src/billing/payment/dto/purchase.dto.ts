@@ -27,4 +27,5 @@ export class PurchaseOutputDto {
   result: PortOneResult;
   order: PurchaseOrderResult;
   subscription?: Subscription | null;
+  issuedSubscriptionResult?: string;
 }
