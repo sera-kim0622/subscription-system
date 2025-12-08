@@ -26,5 +26,5 @@ export class PurchaseOrderResult {
 export class PurchaseOutputDto {
   result: PortOneResult;
   order: PurchaseOrderResult;
-  subscription: Subscription;
+  subscription?: Subscription | null;
 }

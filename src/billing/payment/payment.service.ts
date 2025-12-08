@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { randomUUID } from 'crypto';
 
 import { Product } from '../product/entities/product.entity';
-import { PurchaseInputDto } from './dto/purchase.dto';
+import { PurchaseInputDto, PurchaseOutputDto } from './dto/purchase.dto';
 import { PortOneResult } from './portone/portone.types';
 import { SubscriptionService } from '../subscription/subscription.service';
 
@@ -19,7 +19,10 @@ export class PaymentService {
   /**
    * @description 결제 후 구독생성하는 함수
    */
-  async purchase(dto: PurchaseInputDto, userId: number) {
+  async purchase(
+    dto: PurchaseInputDto,
+    userId: number,
+  ): Promise<PurchaseOutputDto> {
     const { productId, simulate } = dto;
 
     // 1. 현재 판매중인 상품인지 확인
@@ -57,7 +60,6 @@ export class PaymentService {
       });
 
       return {
-        provider: 'PORTONE_MOCK',
         result,
         order: {
           productId: product.id,
@@ -69,7 +71,6 @@ export class PaymentService {
       };
     } else {
       return {
-        provider: 'PORTONE_MOCK',
         result,
         order: {
           productId: product.id,
