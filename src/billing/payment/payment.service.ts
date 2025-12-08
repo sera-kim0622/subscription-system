@@ -22,6 +22,7 @@ export class PaymentService {
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+    @InjectRepository(Payment)
     private readonly paymentRepository: Repository<Payment>,
     private readonly userService: UserService,
     private readonly subscriptionService: SubscriptionService,
@@ -85,8 +86,6 @@ export class PaymentService {
       issuedSubscription: false,
     });
 
-    const result = pgPaymentResult;
-
     let paymentResult: Payment;
     try {
       paymentResult = await this.paymentRepository.save(paymentObject);
@@ -115,6 +114,7 @@ export class PaymentService {
               period: product.type,
               paymentId: 1,
             });
+            break;
           } catch (error) {
             console.log(`${per}회 구독권 발급 시도 중`);
             continue;
