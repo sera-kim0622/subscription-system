@@ -27,4 +27,7 @@ export class Payment extends CoreEntity {
 
   @Column({ type: 'timestamp' })
   paymentDate: Date;
+
+  @Column({ type: 'boolean' })
+  issuedSubscription: boolean;
 }
