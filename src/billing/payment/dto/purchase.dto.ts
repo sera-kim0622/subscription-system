@@ -1,9 +1,10 @@
 import { IsIn, IsNotEmpty } from 'class-validator';
 import { PeriodType } from '../../subscription/types';
 import { Subscription } from '../../subscription/entities/subscription.entity';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PickType } from '@nestjs/swagger';
 import { Payment } from '../entities/payment.entity';
 import { PortOneResult } from '../portone/portone.types';
+import { PAYMENT_STATUS } from '../entities/payment.status';
 
 export class PurchaseInputDto {
   /** 구매할 상품 ID */
@@ -24,9 +25,19 @@ export class PurchaseOrderResult {
   price: number;
 }
 
+export class PurchasePaymentOutput extends PickType(Payment, [
+  'id',
+  'pgPaymentId',
+  'status',
+  'amount',
+  'paymentDate',
+  'issuedSubscription',
+  'createdAt',
+]) {}
+
 export class PurchaseOutputDto {
   order: PurchaseOrderResult;
-  payment?: Payment | null;
+  payment?: PurchasePaymentOutput | null;
   subscription?: Subscription | null;
   resultMessage: string;
   pgPaymentResult: PortOneResult;

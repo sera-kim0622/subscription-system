@@ -93,7 +93,7 @@ export class PaymentService {
       throw new BadRequestException('결제 내역 저장에 실패했습니다.');
     }
 
-    // 3. 결제 정보 받은 후 결과 반환
+    // 4. 결제 정보 받은 후 결과 반환
     // 결제 성공의 경우 : 구독 생성, 구독권과 결제 내역 반환
     // 결제 실패의 경우 : 결제 내역 반환
     if (paymentResult.status === PAYMENT_STATUS.SUCCESS) {
@@ -122,6 +122,12 @@ export class PaymentService {
         }
       }
 
+      // 5. 구독권이 발급되었으면 결제건에 구독권 발급된 flag를 true로 만들어주고 저장
+      if (subscription) {
+        paymentResult.issuedSubscription = true;
+        paymentResult = await this.paymentRepository.save(paymentResult);
+      }
+
       return {
         order: {
           productId: product.id,
@@ -129,7 +135,15 @@ export class PaymentService {
           type: product.type,
           price: product.price,
         },
-        payment: paymentResult,
+        payment: {
+          id: paymentResult.id,
+          pgPaymentId: paymentObject.pgPaymentId,
+          status: paymentObject.status,
+          amount: paymentResult.amount,
+          paymentDate: paymentResult.paymentDate,
+          issuedSubscription: paymentResult.issuedSubscription,
+          createdAt: paymentResult.createdAt,
+        },
         subscription: subscription ?? null,
         resultMessage: subscription
           ? '결제 완료 후 구독권 발급에 성공하였습니다.'
