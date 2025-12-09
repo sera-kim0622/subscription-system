@@ -150,3 +150,20 @@ describe('결제 후 구독생성하는 함수 테스트', () => {
     expect(result.expiredAt.getDate()).toBe(expected.getDate());
   });
 });
+
+describe('유저의 현재 구독 정보 확인하는 함수 테스트', () => {
+  it('유저의 현재 구독이 없다면 null을 반환', async () => {
+    subscriptionRepository.findOne.mockResolvedValue(undefined);
+    const result = await subscriptionService.getCurrentSubscription(1);
+    expect(result).toBe(null);
+  });
+
+  it('유저의 현재 유료 구독이 있다면 해당 구독의 정보를 반환', async () => {
+    subscriptionRepository.findOne.mockResolvedValue({
+      id: 3,
+      product: { id: 1, price: 1000 },
+    });
+    await subscriptionService.getCurrentSubscription(1);
+    expect(subscriptionRepository.findOne).toHaveBeenCalledTimes(1);
+  });
+});
