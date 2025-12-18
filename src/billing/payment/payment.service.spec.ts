@@ -5,6 +5,8 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Product } from '../product/entities/product.entity';
 import { Payment } from './entities/payment.entity';
 import { UserService } from '../../user/user.service';
+import { NotFoundException } from '@nestjs/common';
+import { PeriodType } from '../subscription/types';
 
 let paymentService: PaymentService;
 let paymentRepository: any;
@@ -56,7 +58,7 @@ beforeEach(async () => {
   paymentService = module.get<PaymentService>(PaymentService);
 });
 
-describe('결제 함수 테스트', () => {
+describe('결제 함수(purchase) 테스트', () => {
   it('결제하려는 상품이 존재하지 않을 경우 에러를 반환', async () => {
     productRepository.findOne.mockResolvedValue(undefined);
 
@@ -71,9 +73,55 @@ describe('결제 함수 테스트', () => {
     await expect(result).rejects.toThrow(Error);
   });
 
-  it('결제하려는 유저가 존재하지 않을 경우 에러를 반환', async () => {});
+  it('결제하려는 유저가 존재하지 않을 경우 에러를 반환', async () => {
+    productRepository.findOne.mockResolvedValue({ id: 1 });
 
-  it('이미 구독중인 상품이 있는 경우 에러를 반환', async () => {});
+    userService.getUser.mockImplementation(() => {
+      throw new NotFoundException('유저 없음');
+    });
+
+    const result = paymentService.purchase(
+      {
+        productId: 1,
+        simulate: 'success',
+      },
+      1,
+    );
+
+    expect(productRepository.findOne).toHaveBeenCalledTimes(1);
+    await expect(result).rejects.toThrow(Error);
+  });
+
+  it('이미 구독중인 상품이 있는 경우 에러를 반환', async () => {
+    productRepository.findOne.mockResolvedValue({
+      id: 1,
+      name: 'BASIC',
+      type: PeriodType.MONTHLY,
+      price: 3000,
+    });
+
+    userService.getUser.mockResolvedValue({ id: 1, email: 'sera@gmail.com' });
+    subscriptionService.getCurrentSubscription.mockResolvedValue({
+      id: 1,
+      user: { id: 1 },
+      product: { id: 1 },
+      payment: { id: 1 },
+      expiredAt: new Date(),
+    });
+
+    const result = paymentService.purchase(
+      {
+        productId: 1,
+        simulate: 'success',
+      },
+      1,
+    );
+
+    expect(productRepository.findOne).toHaveBeenCalledTimes(1);
+    expect(userService.getUser).toHaveBeenCalledTimes(1);
+    expect(subscriptionService.getCurrentSubscription).toHaveBeenCalledTimes(1);
+    await expect(result).rejects.toThrow(Error);
+  });
 
   it('결제 결과를 받은 후 결제 테이블에 저장하다가 실패', async () => {});
 
