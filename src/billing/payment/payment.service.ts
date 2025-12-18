@@ -46,13 +46,17 @@ export class PaymentService {
       throw new NotFoundException('존재하지 않는 상품입니다.');
     }
 
-    // 2. 현재 유료 구독을 하고 있는지 확인
+    // 2. 존재하는 유저인지 확인
+    // JWT토큰에는 단지 id에 대한 정보만 있을 뿐
+    // JWT가 만료시간이 남았는데 탈퇴한 유저라면? 이렇게 되면 에러를 일으키기때문에
+    // 한 번 더 확인한다.
     const user = await this.userService.getUser(userId);
 
     if (!user) {
       throw new UnauthorizedException('유저 정보가 확인되지 않습니다.');
     }
 
+    // 3. 현재 유료 구독을 하고 있는지 확인
     const paidSubscription =
       await this.subscriptionService.getCurrentSubscription(userId);
 
