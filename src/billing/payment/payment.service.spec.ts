@@ -5,8 +5,9 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Product } from '../product/entities/product.entity';
 import { Payment } from './entities/payment.entity';
 import { UserService } from '../../user/user.service';
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { PeriodType } from '../subscription/types';
+import { PAYMENT_STATUS } from './entities/payment.status';
 
 let paymentService: PaymentService;
 let paymentRepository: any;
@@ -42,7 +43,7 @@ beforeEach(async () => {
       },
       {
         provide: getRepositoryToken(Payment),
-        useValue: productRepository,
+        useValue: paymentRepository,
       },
       {
         provide: UserService,
@@ -109,21 +110,53 @@ describe('결제 함수(purchase) 테스트', () => {
       expiredAt: new Date(),
     });
 
-    const result = paymentService.purchase(
-      {
-        productId: 1,
-        simulate: 'success',
-      },
-      1,
-    );
-
+    try {
+      await paymentService.purchase({ productId: 1, simulate: 'success' }, 1);
+      fail('에러가 발생해야 합니다.');
+    } catch (err) {
+      expect(err).toBeInstanceOf(BadRequestException);
+    }
     expect(productRepository.findOne).toHaveBeenCalledTimes(1);
     expect(userService.getUser).toHaveBeenCalledTimes(1);
     expect(subscriptionService.getCurrentSubscription).toHaveBeenCalledTimes(1);
-    await expect(result).rejects.toThrow(Error);
   });
 
-  it('결제 결과를 받은 후 결제 테이블에 저장하다가 실패', async () => {});
+  it('결제 결과를 받은 후 결제 테이블에 저장하다가 실패', async () => {
+    productRepository.findOne.mockResolvedValue({
+      id: 1,
+      name: 'BASIC',
+      type: PeriodType.MONTHLY,
+      price: 3000,
+    });
+
+    userService.getUser.mockResolvedValue({ id: 1, email: 'sera@gmail.com' });
+    subscriptionService.getCurrentSubscription.mockResolvedValue(null);
+    paymentRepository.create.mockResolvedValue({
+      user: { id: 1 },
+      pgPaymentId: '550e8400-e29b-41d4-a716-446655440000',
+      status: PAYMENT_STATUS.SUCCESS,
+      amount: 3000,
+      paymentDate: new Date(),
+      issuedSubscription: false,
+    });
+    paymentRepository.save.mockRejectedValue(new Error());
+
+    try {
+      await paymentService.purchase(
+        {
+          productId: 1,
+          simulate: 'success',
+        },
+        1,
+      );
+    } catch (err) {
+      expect(err).toBeInstanceOf(Error);
+    }
+    expect(productRepository.findOne).toHaveBeenCalledTimes(1);
+    expect(userService.getUser).toHaveBeenCalledTimes(1);
+    expect(subscriptionService.getCurrentSubscription).toHaveBeenCalledTimes(1);
+    expect(paymentRepository.create).toHaveBeenCalledTimes(1);
+  });
 
   it('결제 성공 후 구독권을 생성하다가 실패 => 구독권 발급 3회 시도 중 성공', async () => {});
 
