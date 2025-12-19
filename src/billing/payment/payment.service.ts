@@ -107,7 +107,7 @@ export class PaymentService {
           userId,
           productId,
           period: product.type,
-          paymentId: 1,
+          paymentId: paymentResult.id,
         });
       } catch (error) {
         for await (const per of [1, 2, 3]) {
@@ -116,7 +116,7 @@ export class PaymentService {
               userId,
               productId,
               period: product.type,
-              paymentId: 1,
+              paymentId: paymentResult.id,
             });
             break;
           } catch (error) {
