@@ -397,5 +397,25 @@ describe('결제 함수(purchase) 테스트', () => {
       paymentDate: new Date(),
       issuedSubscription: false,
     });
+
+    // 실행부
+    const result = await paymentService.purchase(
+      {
+        productId: 1,
+        simulate: 'fail',
+      },
+      1,
+    );
+
+    expect(productRepository.findOne).toHaveBeenCalledTimes(1);
+    expect(userService.getUser).toHaveBeenCalledTimes(1);
+    expect(subscriptionService.getCurrentSubscription).toHaveBeenCalledTimes(1);
+    // 실패했으므로 구독권 발급은 실행되면 안됨
+    expect(subscriptionService.createSubscription).toHaveBeenCalledTimes(0);
+
+    // 실패해도 결제 정보는 저장하므로 실행됨
+    expect(paymentRepository.save).toHaveBeenCalledTimes(1);
+    expect(result.resultMessage).toBe('결제에 실패하였습니다.');
+    expect(result.subscription).not.toBeDefined();
   });
 });
