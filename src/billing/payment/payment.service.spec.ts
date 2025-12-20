@@ -299,7 +299,103 @@ describe('결제 함수(purchase) 테스트', () => {
     expect(result.subscription).toBe(null);
   });
 
-  it('결제 성공 후 구독권을 생성하여 결제, 구독정보 반환', async () => {});
+  it('결제 성공 후 구독권을 생성하여 결제, 구독정보 반환', async () => {
+    productRepository.findOne.mockResolvedValue({
+      id: 1,
+      name: 'BASIC',
+      type: PeriodType.MONTHLY,
+      price: 3000,
+    });
 
-  it('결제 실패하여 결제 정보를 반환', async () => {});
+    userService.getUser.mockResolvedValue({ id: 1, email: 'sera@gmail.com' });
+
+    subscriptionService.getCurrentSubscription.mockResolvedValue(null);
+
+    paymentRepository.create.mockResolvedValue({
+      user: { id: 1 },
+      pgPaymentId: '550e8400-e29b-41d4-a716-446655440000',
+      status: PAYMENT_STATUS.SUCCESS,
+      amount: 3000,
+      paymentDate: new Date(),
+      issuedSubscription: false,
+    });
+
+    const pgPaymentId = randomUUID();
+    paymentRepository.save.mockResolvedValue({
+      id: 1,
+      user: { id: 1 },
+      pgPaymentId,
+      status: PAYMENT_STATUS.SUCCESS,
+      amount: 3000,
+      paymentDate: new Date(),
+      issuedSubscription: false,
+    });
+
+    // 구독권 한 번에 발급
+    subscriptionService.createSubscription.mockResolvedValue({
+      id: 22,
+      product: { id: 1 },
+      user: { id: 1 },
+      payment: { id: 1 },
+      expiredAt: new Date(),
+    });
+
+    // 함수 실행
+    const result = await paymentService.purchase(
+      {
+        productId: 1,
+        simulate: 'success',
+      },
+      1,
+    );
+
+    expect(productRepository.findOne).toHaveBeenCalledTimes(1);
+    expect(userService.getUser).toHaveBeenCalledTimes(1);
+    expect(subscriptionService.getCurrentSubscription).toHaveBeenCalledTimes(1);
+    expect(subscriptionService.createSubscription).toHaveBeenCalledTimes(1);
+    expect(paymentRepository.save).toHaveBeenCalledTimes(2);
+    expect(result.resultMessage).toBe(
+      '결제 완료 후 구독권 발급에 성공하였습니다.',
+    );
+    expect(result.subscription).toEqual({
+      id: 22,
+      user: { id: 1 },
+      product: { id: 1 },
+      payment: { id: 1 },
+      expiredAt: expect.any(Date),
+    });
+  });
+
+  it('결제 실패하여 결제 정보를 반환', async () => {
+    productRepository.findOne.mockResolvedValue({
+      id: 1,
+      name: 'BASIC',
+      type: PeriodType.MONTHLY,
+      price: 3000,
+    });
+
+    userService.getUser.mockResolvedValue({ id: 1, email: 'sera@gmail.com' });
+
+    subscriptionService.getCurrentSubscription.mockResolvedValue(null);
+
+    const pgPaymentId = randomUUID();
+    paymentRepository.create.mockResolvedValue({
+      user: { id: 1 },
+      pgPaymentId,
+      status: PAYMENT_STATUS.FAIL,
+      amount: 3000,
+      paymentDate: new Date(),
+      issuedSubscription: false,
+    });
+
+    paymentRepository.save.mockResolvedValue({
+      id: 1,
+      user: { id: 1 },
+      pgPaymentId,
+      status: PAYMENT_STATUS.FAIL,
+      amount: 3000,
+      paymentDate: new Date(),
+      issuedSubscription: false,
+    });
+  });
 });
