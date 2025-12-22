@@ -52,10 +52,6 @@ export class PaymentService {
     // 한 번 더 확인한다.
     const user = await this.userService.getUser(userId);
 
-    if (!user) {
-      throw new UnauthorizedException('유저 정보가 확인되지 않습니다.');
-    }
-
     // 3. 현재 유료 구독을 하고 있는지 확인
     const paidSubscription =
       await this.subscriptionService.getCurrentSubscription(userId);
