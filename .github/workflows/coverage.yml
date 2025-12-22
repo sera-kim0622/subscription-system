@@ -1,0 +1,45 @@
+name: Coverage Report
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run tests with coverage
+        run: yarn test:cov
+
+      # HTML Coverage Report Pages에 업로드
+      - name: Deploy Coverage Report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./coverage/lcov-report
+
+      # Coverage Badge JSON 생성
+      - name: Create coverage badge
+        id: covbadge
+        uses: schneegans/dynamic-badges-action@v1.6.0
+        with:
+          auth: ${{ secrets.GITHUB_TOKEN }}
+          filename: coverage.json
+          label: coverage
+          message: ${{ fromJson(file('coverage/coverage-summary.json')).total.lines.pct }}%
+          color: green
+
+      - name: Commit badge file
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add coverage.json || true
+          git commit -m "update coverage badge" || echo "no changes"
+          git push || true
