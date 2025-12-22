@@ -9,4 +9,5 @@ module.exports = {
     '^src/(.*)$': '<rootDir>/$1',
   },
   coveragePathIgnorePatterns: ['.*\\.entity\\.ts$'],
+  coverageReporters: ['json-summary', 'lcov', 'text'],
 };
