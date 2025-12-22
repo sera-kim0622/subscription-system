@@ -58,7 +58,7 @@ jobs:
       - name: Upload coverage artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: coverage/lcov-report
+          path: src/coverage/lcov-report
 
   # ----------------------------
   # 4) GitHub Pages 로 배포
