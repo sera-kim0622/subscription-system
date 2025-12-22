@@ -8,7 +8,7 @@ https://www.sera-kim.shop
 
 ## 유닛 테스트 결과
 
-![coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/<USER>/<REPO>/main/coverage.json)
+![Coverage](https://img.shields.io/badge/Coverage-${{ steps.coverage.outputs.coverage }}%25-brightgreen)
 
 ## 진행사항
 
