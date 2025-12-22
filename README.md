@@ -6,6 +6,10 @@ https://www.sera-kim.shop
 
 ![Subscription system architecture](./subscription-system-diagram.png)
 
+## 유닛 테스트 결과
+
+![coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/<USER>/<REPO>/main/coverage.json)
+
 ## 진행사항
 
 1. 테스트 자동화 정비
