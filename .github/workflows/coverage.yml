@@ -12,6 +12,7 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,15 +23,25 @@ jobs:
       - name: Run tests with coverage
         run: yarn test:cov
 
-      # 1) coverage badge 생성
+      # ----------------------------
+      # 1) coverage-summary.json에서 percentage 추출
+      # ----------------------------
+      - name: Extract coverage percent
+        id: cov
+        run: |
+          PCT=$(jq '.total.lines.pct' coverage/coverage-summary.json)
+          echo "pct=$PCT" >> $GITHUB_OUTPUT
+
+      # ----------------------------
+      # 2) coverage badge 생성
+      # ----------------------------
       - name: Create coverage badge
-        id: covbadge
         uses: schneegans/dynamic-badges-action@v1.6.0
         with:
           auth: ${{ secrets.GITHUB_TOKEN }}
           filename: coverage.json
           label: coverage
-          message: ${{ fromJson(file('coverage/coverage-summary.json')).total.lines.pct }}%
+          message: '${{ steps.cov.outputs.pct }}%'
           color: green
 
       - name: Commit badge file
@@ -41,13 +52,17 @@ jobs:
           git commit -m "Update coverage badge" || true
           git push || true
 
-      # 2) HTML coverage report 업로드 (Pages용 artifact)
+      # ----------------------------
+      # 3) HTML coverage report 업로드 (Pages용)
+      # ----------------------------
       - name: Upload coverage artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: coverage/lcov-report
 
-  # 3) Pages 배포
+  # ----------------------------
+  # 4) GitHub Pages 로 배포
+  # ----------------------------
   deploy:
     needs: test
     runs-on: ubuntu-latest
