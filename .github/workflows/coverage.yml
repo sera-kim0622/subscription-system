@@ -29,7 +29,7 @@ jobs:
       - name: Extract coverage percent
         id: cov
         run: |
-          PCT=$(jq '.total.lines.pct' coverage/coverage-summary.json)
+          PCT=$(jq '.total.lines.pct' src/coverage/coverage-summary.json)
           echo "pct=$PCT" >> $GITHUB_OUTPUT
 
       # ----------------------------
