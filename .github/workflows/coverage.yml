@@ -45,14 +45,6 @@ jobs:
           message: '${{ steps.cov.outputs.pct }}%'
           color: green
 
-      - name: Commit badge file
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add coverage.json || true
-          git commit -m "Update coverage badge" || true
-          git push || true
-
       # ----------------------------
       # 3) HTML coverage report 업로드 (Pages용)
       # ----------------------------
