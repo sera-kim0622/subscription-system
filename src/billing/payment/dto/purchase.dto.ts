@@ -4,7 +4,6 @@ import { Subscription } from '../../subscription/entities/subscription.entity';
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { Payment } from '../entities/payment.entity';
 import { PortOneResult } from '../portone/portone.types';
-import { PAYMENT_STATUS } from '../entities/payment.status';
 
 export class PurchaseInputDto {
   /** 구매할 상품 ID */
