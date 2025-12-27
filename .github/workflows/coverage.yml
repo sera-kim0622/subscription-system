@@ -23,18 +23,14 @@ jobs:
       - name: Run tests with coverage
         run: yarn test:cov
 
-      # ----------------------------
-      # 1) coverage-summary.json에서 percentage 추출
-      # ----------------------------
+      # Extract coverage summary
       - name: Extract coverage percent
         id: cov
         run: |
           PCT=$(jq '.total.lines.pct' src/coverage/coverage-summary.json)
           echo "pct=$PCT" >> $GITHUB_OUTPUT
 
-      # ----------------------------
-      # 2) coverage badge 생성
-      # ----------------------------
+      # Create gist badge only
       - name: Create coverage badge
         uses: schneegans/dynamic-badges-action@v1.6.0
         with:
@@ -44,18 +40,14 @@ jobs:
           label: Coverage
           message: '${{ steps.cov.outputs.pct }}%'
           color: green
+          forceUpdate: true
 
-      # ----------------------------
-      # 3) HTML coverage report 업로드 (Pages용)
-      # ----------------------------
+      # Upload coverage HTML report to GitHub Pages
       - name: Upload coverage artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: src/coverage/lcov-report
 
-  # ----------------------------
-  # 4) GitHub Pages 로 배포
-  # ----------------------------
   deploy:
     needs: test
     runs-on: ubuntu-latest
