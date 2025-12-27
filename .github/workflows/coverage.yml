@@ -38,9 +38,10 @@ jobs:
       - name: Create coverage badge
         uses: schneegans/dynamic-badges-action@v1.6.0
         with:
-          auth: ${{ secrets.GITHUB_TOKEN }}
+          auth: ${{ secrets.GIST_TOKEN }}
+          gistID: dea840e18ff6c9590895a3b120f8f077
           filename: coverage.json
-          label: coverage
+          label: Coverage
           message: '${{ steps.cov.outputs.pct }}%'
           color: green
 
