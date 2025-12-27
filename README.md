@@ -12,18 +12,20 @@ https://www.sera-kim.shop
 
 ## 진행사항
 
-1. 테스트 자동화 정비
-   1. 구독 서비스 프로젝트 생성
-      - [x] 회원가입
-      - [x] 로그인
-      - [x] 내 정보확인(+구독정보)
-      - [x] 구독 상품 조회
-      - [ ] 구독 상품 구매
-      - [ ] 구독 상품 환불
-   2. Jest + Supertest로 **단위 테스트/통합 테스트 작성**
-   3. GitHub Actions에서 **테스트 자동화 파이프라인** 추가
-   4. Coverage 리포트(`jest --coverage`)까지 CI에 연결
-   5. 최종 정리: "테스트 커버리지 + CI 연동" 결과 첨부 예정
+1. API 생성
+   - [x] 회원가입
+   - [x] 로그인
+   - [x] 구독 상품 조회
+   - [x] 구독 상품 구매
+   - [ ] 구독 상품 환불
+
+2. Jest + Supertest로 **단위 테스트/통합 테스트 작성**
+   - [x] 단위 테스트
+   - [ ] 통합 테스트
+
+3. **테스트 자동화 파이프라인** 추가
+   - [x] Gist로 coverage report 페이지 생성
+   - [x] Github actions로 test 실행(CI)
 
 ## Description
 
