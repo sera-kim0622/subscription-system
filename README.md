@@ -4,7 +4,7 @@ https://www.sera-kim.shop
 
 ## 시스템 아키텍쳐
 
-![Subscription system architecture](./subscription-system-diagram.png)
+![Subscription system architecture](./subscription-back-diagram.png)
 
 ## 유닛 테스트 결과
 
