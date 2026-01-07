@@ -54,18 +54,26 @@ export class UserService {
 
   async login(dto: LoginDto): Promise<{ accessToken: string }> {
     const { email, password } = dto;
+
+    // 유저의 아이디가 존재하는지와 비밀번호가 일치하지 않는지 명확한 답을 내려주지 않는 이유
+    // 나의 생각 : 정보 탈취자가 아이디와 비밀번호를 탈취를 하겠다고 마음을 먹으면 모두 탈취해 갈 수 있는데
+    // 이로 인해 사용자 허들만 높아지는 것이 아닌가?
+    // 이에 대한 답을 찾아본 결과 완벽한 보안을 설정하기 위함이 아니라 보안 비용을 높이기 위함이다.
+    // 모든 정보 탈취자는 전문 공격자가 아니며 대부분의 공격자는 이메일 존재 수집, 무작위 대입 등을 통해 정보를 얻으려고 함
+    // 이 때 이메일 리스트를 통해 존재하는 이메일만을 수집할 수 있으며 이 자체가 정보 탈취라 볼 수 있음
+    // 이것을 User Enumeration공격이라고 함.
     const user = await this.userRepo.findOne({
       where: { email },
       select: ['id', 'email', 'password', 'role'],
     });
 
-    if (!user) {
-      throw new UnauthorizedException('존재하지 않는 이메일입니다.');
-    }
-
     const passwordConfirm = await bcrypt.compare(password, user.password);
-    if (!passwordConfirm) {
-      throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
+
+    if (!user || !passwordConfirm) {
+      throw new UnauthorizedException({
+        code: ErrorCode.AUTH_INVALID_CREDENTIALS,
+        message: '이메일 또는 비밀번호가 올바르지 않습니다.',
+      });
     }
 
     let accessToken;
