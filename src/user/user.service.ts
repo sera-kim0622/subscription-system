@@ -24,16 +24,24 @@ export class UserService {
 
   async create(dto: CreateUserDto): Promise<User> {
     try {
+      // 중복 이메일 검증
       const exists = await this.userRepo.findOne({
         where: { email: dto.email },
       });
-      if (exists) throw new ConflictException('Email already in use');
+
+      if (exists) {
+        throw new ConflictException({
+          code: 'USER_EMAIL_DUPLICATED',
+          message: '이미 가입된 이메일입니다.',
+        });
+      }
 
       const user = this.userRepo.create({
         email: dto.email,
         password: dto.password,
         role: dto.role,
       });
+
       return this.userRepo.save(user);
     } catch (error) {
       if (error instanceof HttpException) {
