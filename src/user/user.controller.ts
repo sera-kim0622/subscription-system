@@ -1,9 +1,18 @@
-import { Body, Controller, Get, Post, UseGuards, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  UseGuards,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Response } from 'express';
 
 @ApiTags('users')
 @Controller('users')
@@ -18,8 +27,19 @@ export class UserController {
   }
 
   @Post('login')
-  async login(@Body() dto: LoginDto) {
-    return await this.userService.login(dto);
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { accessToken } = await this.userService.login(dto);
+
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 1000 * 60 * 15,
+    });
   }
 
   @Get('profile')
