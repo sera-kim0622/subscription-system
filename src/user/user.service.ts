@@ -14,6 +14,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
 import { GetUserOutputDto } from './dto/get-user.dto';
+import { ErrorCode } from '../common/errors/error-code.enum';
 
 @Injectable()
 export class UserService {
@@ -31,7 +32,7 @@ export class UserService {
 
       if (exists) {
         throw new ConflictException({
-          code: 'USER_EMAIL_DUPLICATED',
+          code: ErrorCode.USER_EMAIL_DUPLICATED,
           message: '이미 가입된 이메일입니다.',
         });
       }
