@@ -19,7 +19,7 @@ export class PaymentController {
   @Post('purchase')
   purchase(
     @Body() dto: PurchaseInputDto,
-    @CurrentUser('id') userId: number,
+    @CurrentUser() userId: number,
   ): Promise<PurchaseOutputDto> {
     return this.paymentService.purchase(dto, userId);
   }
@@ -28,5 +28,7 @@ export class PaymentController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post('refund') // 환불 과정은 취소한 행위에 대한 새로운 처리이므로 관용적으로 post를 주로 사용, 결제대행사들도 모두 post를 사용함
-  refund(@CurrentUser('id') userId: number) {}
+  refund(@CurrentUser() userId: number) {
+    return this.paymentService.refund(userId);
+  }
 }

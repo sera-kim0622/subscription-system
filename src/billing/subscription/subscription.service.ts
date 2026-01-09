@@ -31,7 +31,7 @@ export class SubscriptionService {
 
     // 동일 거래 중복 방지
     const duplicateSubscription = await this.subscriptionRepository.findOne({
-      where: { payment: paymentId } as any,
+      where: { payment: { id: paymentId } } as any,
     });
 
     if (duplicateSubscription) {
