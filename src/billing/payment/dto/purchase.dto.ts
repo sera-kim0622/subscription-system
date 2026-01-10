@@ -1,9 +1,9 @@
 import { IsIn, IsNotEmpty } from 'class-validator';
 import { PeriodType } from '../../subscription/types';
-import { Subscription } from '../../subscription/entities/subscription.entity';
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { Payment } from '../entities/payment.entity';
 import { PortOneResult } from '../portone/portone.types';
+import { SubscriptionOutputDto } from '../../subscription/dtos/subscription.dto';
 
 export class PurchaseInputDto {
   /** 구매할 상품 ID */
@@ -37,7 +37,11 @@ export class PurchasePaymentOutput extends PickType(Payment, [
 export class PurchaseOutputDto {
   order: PurchaseOrderResult;
   payment?: PurchasePaymentOutput | null;
-  subscription?: Subscription | null;
+  subscription?: SubscriptionOutputDto | null;
   resultMessage: string;
   pgPaymentResult: PortOneResult;
+
+  constructor(partial: Partial<PurchaseOutputDto>) {
+    Object.assign(this, partial);
+  }
 }
