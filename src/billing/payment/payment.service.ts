@@ -2,7 +2,6 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -16,6 +15,7 @@ import { Subscription } from '../subscription/entities/subscription.entity';
 import { Payment } from './entities/payment.entity';
 import { UserService } from '../../user/user.service';
 import { PAYMENT_STATUS } from './entities/payment.status';
+import { PeriodType } from '../subscription/types';
 
 @Injectable()
 export class PaymentService {
@@ -92,7 +92,6 @@ export class PaymentService {
     } catch (error) {
       throw new BadRequestException('결제 내역 저장에 실패했습니다.');
     }
-
     // 4. 결제 정보 받은 후 결과 반환
     // 결제 성공의 경우 : 구독 생성, 구독권과 결제 내역 반환
     // 결제 실패의 경우 : 결제 내역 반환
@@ -170,10 +169,38 @@ export class PaymentService {
    */
   async refund(userId: number) {
     // 1. 유저가 존재하는지 확인
+    const user = await this.userService.getUser(userId);
+
     // 2. 유저가 유효한 유료구독을 하고있는지 확인
+    const subscription =
+      await this.subscriptionService.getCurrentSubscription(userId);
+
+    if (!subscription) {
+      throw new BadRequestException(
+        '구독중인 구독이 없어 환불이 불가능합니다.',
+      );
+    }
+
     // 3. 유료구독 정보와 연결된 구매기록 확인
+    const payment = await this.paymentRepository.findOne({
+      where: { subscription },
+    });
+
     // 4. 환불 금액 계산하기
+    // 일(Day) 단위로 계산하기, 남은 날짜 = 만료 날짜 - 현재 날짜(millisecond를 일로 환산)
+    const remainDays =
+      subscription.expiredAt.getTime() -
+      new Date().getTime() / (1000 / 60 / 60 / 24);
+    // 현재 구독중인 상품의 일간 금액 계산하기
+    const pricePerDay =
+      subscription.product.price /
+      (subscription.product.type === PeriodType.MONTHLY ? 30 : 365);
+
+    // 결제한 금액 - (남은날짜 * 일간 금액)
+    const refundAmount = payment.amount - remainDays * pricePerDay;
+
     // 5. 구매기록의 id로 결제대행사에 환불 요청 보내기
+    const pgPaymentResult = {};
     // 5-1. 결제 대행사 응답 성공 버전 작성
     // 5-2. 결제 대행사 응답 실패 버전 작성
     // 6. 결제 결과 저장하기(새로운 record 생성)
