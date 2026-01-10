@@ -16,6 +16,8 @@ import { Payment } from './entities/payment.entity';
 import { UserService } from '../../user/user.service';
 import { PAYMENT_STATUS } from './entities/payment.status';
 import { PeriodType } from '../subscription/types';
+import { SubscriptionOutputDto } from '../subscription/dtos/subscription.dto';
+import { PaymentOutput } from './dto/payment.dto';
 
 @Injectable()
 export class PaymentService {
@@ -127,28 +129,21 @@ export class PaymentService {
         paymentResult = await this.paymentRepository.save(paymentResult);
       }
 
-      return {
+      return new PurchaseOutputDto({
         order: {
           productId: product.id,
           name: product.name,
           type: product.type,
           price: product.price,
         },
-        payment: {
-          id: paymentResult.id,
-          pgPaymentId: paymentObject.pgPaymentId,
-          status: paymentObject.status,
-          amount: paymentResult.amount,
-          paymentDate: paymentResult.paymentDate,
-          issuedSubscription: paymentResult.issuedSubscription,
-          createdAt: paymentResult.createdAt,
-        },
-        subscription: subscription ?? null,
+        payment: new PaymentOutput(paymentResult),
+        subscription: subscription
+          ? new SubscriptionOutputDto(subscription)
+          : null,
         resultMessage: subscription
           ? '결제 완료 후 구독권 발급에 성공하였습니다.'
           : '결제는 성공하였으나 구독권 발급에 실패하였습니다.',
-        pgPaymentResult,
-      };
+      });
     } else if (paymentResult.status === PAYMENT_STATUS.FAIL) {
       return {
         order: {
@@ -158,7 +153,6 @@ export class PaymentService {
           price: product.price,
         },
         resultMessage: '결제에 실패하였습니다.',
-        pgPaymentResult,
       };
     }
   }

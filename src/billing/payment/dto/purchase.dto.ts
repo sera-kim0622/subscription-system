@@ -4,6 +4,7 @@ import { ApiProperty, PickType } from '@nestjs/swagger';
 import { Payment } from '../entities/payment.entity';
 import { PortOneResult } from '../portone/portone.types';
 import { SubscriptionOutputDto } from '../../subscription/dtos/subscription.dto';
+import { PaymentOutput } from './payment.dto';
 
 export class PurchaseInputDto {
   /** 구매할 상품 ID */
@@ -24,22 +25,11 @@ export class PurchaseOrderResult {
   price: number;
 }
 
-export class PurchasePaymentOutput extends PickType(Payment, [
-  'id',
-  'pgPaymentId',
-  'status',
-  'amount',
-  'paymentDate',
-  'issuedSubscription',
-  'createdAt',
-]) {}
-
 export class PurchaseOutputDto {
   order: PurchaseOrderResult;
-  payment?: PurchasePaymentOutput | null;
+  payment?: PaymentOutput | null;
   subscription?: SubscriptionOutputDto | null;
   resultMessage: string;
-  pgPaymentResult: PortOneResult;
 
   constructor(partial: Partial<PurchaseOutputDto>) {
     Object.assign(this, partial);
