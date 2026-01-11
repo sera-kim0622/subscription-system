@@ -94,31 +94,34 @@ export class PaymentService {
     } catch (error) {
       throw new BadRequestException('결제 내역 저장에 실패했습니다.');
     }
+
     // 4. 결제 정보 받은 후 결과 반환
     // 결제 성공의 경우 : 구독 생성, 구독권과 결제 내역 반환
     // 결제 실패의 경우 : 결제 내역 반환
     if (paymentResult.status === PAYMENT_STATUS.SUCCESS) {
       let subscription: Subscription;
-      try {
-        subscription = await this.subscriptionService.createSubscription({
-          userId,
-          productId,
-          period: product.type,
-          paymentId: paymentResult.id,
-        });
-      } catch (error) {
-        for await (const per of [1, 2, 3]) {
-          try {
-            subscription = await this.subscriptionService.createSubscription({
-              userId,
-              productId,
-              period: product.type,
-              paymentId: paymentResult.id,
-            });
-            break;
-          } catch (error) {
-            console.log(`${per}회 구독권 발급 시도 중`);
-            continue;
+      if (simulate === 'success') {
+        try {
+          subscription = await this.subscriptionService.createSubscription({
+            userId,
+            productId,
+            period: product.type,
+            paymentId: paymentResult.id,
+          });
+        } catch (error) {
+          for await (const per of [1, 2, 3]) {
+            try {
+              subscription = await this.subscriptionService.createSubscription({
+                userId,
+                productId,
+                period: product.type,
+                paymentId: paymentResult.id,
+              });
+              break;
+            } catch (error) {
+              console.log(`${per}회 구독권 발급 시도 중`);
+              continue;
+            }
           }
         }
       }
