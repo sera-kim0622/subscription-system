@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { randomUUID } from 'crypto';
 
 import { Product } from '../product/entities/product.entity';
 import {
@@ -13,7 +12,6 @@ import {
   PurchaseOutputDto,
   PurchaseResultStatus,
 } from './dto/purchase.dto';
-import { PortOneResult } from './portone/portone.types';
 import { SubscriptionService } from '../subscription/subscription.service';
 import { Subscription } from '../subscription/entities/subscription.entity';
 import { Payment } from './entities/payment.entity';
@@ -22,6 +20,7 @@ import { PAYMENT_STATUS } from './entities/payment.status';
 import { PeriodType } from '../subscription/types';
 import { SubscriptionOutputDto } from '../subscription/dtos/subscription.dto';
 import { PaymentOutput } from './dto/payment.dto';
+import { PgPaymentResultMap } from './mocking/purchase.mocking';
 
 @Injectable()
 export class PaymentService {
@@ -67,29 +66,25 @@ export class PaymentService {
     }
 
     // ===== mock 결제 모델 만드는 로직 =====
-    const isFail = simulate === 'fail';
-    const pgPaymentId = randomUUID();
-
-    const pgPaymentResult: PortOneResult = isFail
-      ? {
-          status: PAYMENT_STATUS.FAIL,
-          failReason: 'SIMULATED_FAILURE',
-        }
-      : {
-          pgPaymentId,
-          status: PAYMENT_STATUS.SUCCESS,
-          paidAt: new Date().toISOString(),
-        };
-    // ===== mock 결제 모델 만드는 로직 =====
+    const pgPaymentResult = PgPaymentResultMap[simulate];
 
     // 3. mock 결제 정보 payment 테이블에 저장
     const paymentObject = this.paymentRepository.create({
       user,
-      pgPaymentId: pgPaymentResult.pgPaymentId,
+      pgPaymentId:
+        pgPaymentResult.status === PAYMENT_STATUS.SUCCESS
+          ? pgPaymentResult.pgPaymentId
+          : null,
       status: pgPaymentResult.status,
       amount: product.price,
-      paymentDate: pgPaymentResult.paidAt ?? null,
-      failReason: pgPaymentResult.failReason ?? null,
+      paymentDate:
+        pgPaymentResult.status === PAYMENT_STATUS.SUCCESS
+          ? pgPaymentResult.paidAt
+          : null,
+      failReason:
+        pgPaymentResult.status === PAYMENT_STATUS.FAIL
+          ? pgPaymentResult.failReason
+          : null,
       issuedSubscription: false,
     });
 
