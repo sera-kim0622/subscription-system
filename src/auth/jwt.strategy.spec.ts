@@ -10,7 +10,7 @@ jest.mock('passport-jwt', () => {
       this._verify = verify;
     }),
     ExtractJwt: {
-      fromAuthHeaderAsBearerToken: jest.fn().mockReturnValue('Bearer token'),
+      fromExtractors: jest.fn().mockReturnValue('accessToken'),
     },
   };
 });
