@@ -15,7 +15,7 @@ describe('Date객체를 yyyy-MM-dd로 시작하는 string으로 반환하는 함
   it('format을 date로 선택하면 yyyy-MM-dd형식으로 반환', () => {
     const dto = new TestDateDto();
 
-    dto.testDate = new Date('2026-02-10T09:00:00');
+    dto.testDate = new Date('2026-02-10T00:00:00Z');
 
     const plain = instanceToPlain(dto);
 
@@ -26,7 +26,7 @@ describe('Date객체를 yyyy-MM-dd로 시작하는 string으로 반환하는 함
   it('format을 datetime으로 선택하면 yyyy-MM-dd HH:mm:ss으로 반환한다.', () => {
     const dto = new TestDateTimeDto();
 
-    dto.testDate = new Date('2026-02-10T09:00:00');
+    dto.testDate = new Date('2026-02-10T00:00:00Z');
 
     const plain = instanceToPlain(dto);
 
