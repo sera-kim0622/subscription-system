@@ -85,6 +85,7 @@ export class PaymentService {
       status: pgPaymentResult.status,
       amount: product.price,
       paymentDate: pgPaymentResult.paidAt ?? null,
+      failReason: pgPaymentResult.failReason ?? null,
       issuedSubscription: false,
     });
 

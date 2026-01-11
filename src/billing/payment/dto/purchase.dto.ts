@@ -1,8 +1,6 @@
 import { IsIn, IsNotEmpty } from 'class-validator';
 import { PeriodType } from '../../subscription/types';
-import { ApiProperty, PickType } from '@nestjs/swagger';
-import { Payment } from '../entities/payment.entity';
-import { PortOneResult } from '../portone/portone.types';
+import { ApiProperty } from '@nestjs/swagger';
 import { SubscriptionOutputDto } from '../../subscription/dtos/subscription.dto';
 import { PaymentOutput } from './payment.dto';
 
