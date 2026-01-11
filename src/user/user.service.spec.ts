@@ -11,6 +11,7 @@ import {
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
+import { ErrorCode } from '../common/errors/error-code.enum';
 
 jest.mock('bcrypt', () => ({
   hash: jest.fn(),
@@ -96,20 +97,22 @@ describe('회원가입', () => {
 describe('가입한 회원(로그인)인지 확인하는 함수', () => {
   it('존재하지 않는 회원일 경우 UnauthorizedException을 반환', async () => {
     userRepository.findOne.mockResolvedValue(undefined);
-    await expect(
-      service.login({
-        email: 'sera.kim@gmail.com',
-        password: 'pass1234',
-      }),
-    ).rejects.toThrow(UnauthorizedException);
 
-    userRepository.findOne.mockResolvedValue(undefined);
-    await expect(
-      service.login({
+    try {
+      await service.login({
         email: 'sera.kim@gmail.com',
         password: 'pass1234',
-      }),
-    ).rejects.toThrow('존재하지 않는 이메일입니다');
+      });
+    } catch (error) {
+      expect(error).toBeInstanceOf(UnauthorizedException);
+
+      const response = error.getResponse() as {
+        code: string;
+        message: string;
+      };
+
+      expect(response.code).toBe(ErrorCode.AUTH_INVALID_CREDENTIALS);
+    }
   });
 
   it('비밀번호가 일치하지 않는 경우 UnauthorizedException을 반환', async () => {
@@ -117,14 +120,21 @@ describe('가입한 회원(로그인)인지 확인하는 함수', () => {
     const compareError = jest.fn().mockResolvedValue(false);
     (bcrypt.compare as jest.Mock) = compareError;
 
-    await expect(
-      service.login({
+    try {
+      await service.login({
         email: 'sera.kim@gmail.com',
         password: 'pass1234',
-      }),
-    ).rejects.toThrow(
-      new UnauthorizedException('비밀번호가 일치하지 않습니다.'),
-    );
+      });
+    } catch (error) {
+      expect(error).toBeInstanceOf(UnauthorizedException);
+
+      const response = error.getResponse() as {
+        code: string;
+        message: string;
+      };
+
+      expect(response.code).toBe(ErrorCode.AUTH_INVALID_CREDENTIALS);
+    }
   });
 
   it('로그인 중 알 수 없는 에러가 발생했을 때 에러 반환', async () => {
