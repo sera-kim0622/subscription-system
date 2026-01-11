@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
 
-export const TransformDate = (format: 'date' | 'datetime' = 'date') => {
+export const TransformDate = (format: 'date' | 'datetime') => {
   return Transform(({ value }) => {
     if (!value) {
       return null;
