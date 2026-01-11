@@ -8,7 +8,11 @@ import { Repository } from 'typeorm';
 import { randomUUID } from 'crypto';
 
 import { Product } from '../product/entities/product.entity';
-import { PurchaseInputDto, PurchaseOutputDto } from './dto/purchase.dto';
+import {
+  PurchaseInputDto,
+  PurchaseOutputDto,
+  PurchaseResultStatus,
+} from './dto/purchase.dto';
 import { PortOneResult } from './portone/portone.types';
 import { SubscriptionService } from '../subscription/subscription.service';
 import { Subscription } from '../subscription/entities/subscription.entity';
@@ -144,6 +148,9 @@ export class PaymentService {
         resultMessage: subscription
           ? '결제 완료 후 구독권 발급에 성공하였습니다.'
           : '결제는 성공하였으나 구독권 발급에 실패하였습니다.',
+        resultStatus: subscription
+          ? PurchaseResultStatus.SUCCESS
+          : PurchaseResultStatus.SUBSCRIPTION_FAILED,
       });
     } else if (paymentResult.status === PAYMENT_STATUS.FAIL) {
       return {
@@ -154,6 +161,7 @@ export class PaymentService {
           price: product.price,
         },
         resultMessage: '결제에 실패하였습니다.',
+        resultStatus: PurchaseResultStatus.PAYMENT_FAILED,
       };
     }
   }
