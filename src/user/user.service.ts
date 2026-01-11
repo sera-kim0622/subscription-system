@@ -67,9 +67,16 @@ export class UserService {
       select: ['id', 'email', 'password', 'role'],
     });
 
+    if (!user) {
+      throw new UnauthorizedException({
+        code: ErrorCode.AUTH_INVALID_CREDENTIALS,
+        message: '이메일 또는 비밀번호가 올바르지 않습니다.',
+      });
+    }
+
     const passwordConfirm = await bcrypt.compare(password, user.password);
 
-    if (!user || !passwordConfirm) {
+    if (!passwordConfirm) {
       throw new UnauthorizedException({
         code: ErrorCode.AUTH_INVALID_CREDENTIALS,
         message: '이메일 또는 비밀번호가 올바르지 않습니다.',
