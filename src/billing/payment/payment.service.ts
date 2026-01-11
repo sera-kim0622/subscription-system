@@ -153,16 +153,17 @@ export class PaymentService {
           : PurchaseResultStatus.SUBSCRIPTION_FAILED,
       });
     } else if (paymentResult.status === PAYMENT_STATUS.FAIL) {
-      return {
+      return new PurchaseOutputDto({
         order: {
           productId: product.id,
           name: product.name,
           type: product.type,
           price: product.price,
         },
+        payment: new PaymentOutput(paymentResult),
         resultMessage: '결제에 실패하였습니다.',
         resultStatus: PurchaseResultStatus.PAYMENT_FAILED,
-      };
+      });
     }
   }
 
