@@ -12,8 +12,8 @@ export class PurchaseInputDto {
 
   /** 모킹 시나리오 (기본: success) */
   @ApiProperty({ example: 'success', description: 'success or fail' })
-  @IsIn(['success', 'fail'])
-  simulate?: 'success' | 'fail';
+  @IsIn(['success', 'subscription_fail', 'fail'])
+  simulate?: 'success' | 'subscription_fail' | 'fail';
 }
 
 export class PurchaseOrderResult {
