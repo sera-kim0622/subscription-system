@@ -23,11 +23,18 @@ export class PurchaseOrderResult {
   price: number;
 }
 
+export enum PurchaseResultStatus {
+  SUCCESS = 'SUCCESS', // 결제 성공 + 구독 성공
+  SUBSCRIPTION_FAILED = 'SUBSCRIPTION_FAILED', // 결제 성공 + 구독 실패
+  PAYMENT_FAILED = 'PAYMENT_FAILED', // 결제 실패
+}
+
 export class PurchaseOutputDto {
   order: PurchaseOrderResult;
   payment?: PaymentOutput | null;
   subscription?: SubscriptionOutputDto | null;
   resultMessage: string;
+  resultStatus: PurchaseResultStatus;
 
   constructor(partial: Partial<PurchaseOutputDto>) {
     Object.assign(this, partial);
