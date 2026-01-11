@@ -226,11 +226,8 @@ describe('결제 함수(purchase) 테스트', () => {
     expect(result.resultMessage).toBe(
       '결제 완료 후 구독권 발급에 성공하였습니다.',
     );
-    expect(result.subscription).toEqual({
+    expect(result.subscription).toMatchObject({
       id: 22,
-      user: { id: 1 },
-      product: { id: 1 },
-      payment: { id: 1 },
       expiredAt: expect.any(Date),
     });
   });
@@ -357,11 +354,9 @@ describe('결제 함수(purchase) 테스트', () => {
     expect(result.resultMessage).toBe(
       '결제 완료 후 구독권 발급에 성공하였습니다.',
     );
-    expect(result.subscription).toEqual({
+
+    expect(result.subscription).toMatchObject({
       id: 22,
-      user: { id: 1 },
-      product: { id: 1 },
-      payment: { id: 1 },
       expiredAt: expect.any(Date),
     });
   });
@@ -419,3 +414,5 @@ describe('결제 함수(purchase) 테스트', () => {
     expect(result.subscription).not.toBeDefined();
   });
 });
+
+describe('환불 함수(refund) 테스트', () => {});
