@@ -14,6 +14,8 @@ export class PaymentOutput {
   @TransformDate('datetime')
   paymentDate: Date;
 
+  failReason: string | null;
+
   issuedSubscription: boolean;
 
   constructor(payment: Payment) {
@@ -22,6 +24,7 @@ export class PaymentOutput {
     this.amount = payment.amount;
     this.pgPaymentId = payment.pgPaymentId;
     this.paymentDate = payment.paymentDate;
+    this.failReason = payment.failReason;
     this.issuedSubscription = payment.issuedSubscription;
   }
 }

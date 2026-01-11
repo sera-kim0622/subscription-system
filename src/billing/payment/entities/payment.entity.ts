@@ -25,6 +25,9 @@ export class Payment extends CoreEntity {
   @Column({ type: 'timestamp', nullable: true })
   paymentDate: Date | null;
 
+  @Column({ type: 'varchar', nullable: true })
+  failReason: string | null;
+
   @Column({ type: 'boolean' })
   issuedSubscription: boolean;
 }
