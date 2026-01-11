@@ -38,7 +38,7 @@ export class UserController {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 1000 * 60 * 15,
+      maxAge: 1000 * 60 * 120,
     });
   }
 
