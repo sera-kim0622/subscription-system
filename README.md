@@ -31,18 +31,6 @@ https://www.sera-kim.shop
 
 유저가 월간/연간 상품을 결제 후 구독권이 생성되는 시스템을 만든 백엔드 서버입니다.
 
-## Installation
-
-```bash
-yarn install
-```
-
-## Running the app
-
-```bash
-yarn run start:prod
-```
-
 ## Test
 
 jest-mock-extended : 모의 객체를 생성해주는 패키지
