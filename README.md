@@ -10,6 +10,8 @@ https://www.sera-kim.shop
 
 ![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/sera-kim0622/dea840e18ff6c9590895a3b120f8f077/raw/coverage.json)
 
+- 📊 [Jest Coverage Report](https://sera-kim0622.github.io/subscription-backend/coverage/)
+
 ## 진행사항
 
 1. API 생성
